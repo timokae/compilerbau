@@ -14,9 +14,11 @@
 */
 
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 class ArithmetikParserApplication implements TokenList{
 	public static void main(String args[]){
-		
 		// Anlegen des Wurzelknotens fuer den Syntaxbaum. Dem Konstruktor
 		// wid als Token das Startsymbol der Grammatik uebergeben
 		SyntaxTree parseTree = new SyntaxTree(EXPRESSION);
@@ -35,6 +37,14 @@ class ArithmetikParserApplication implements TokenList{
                 if (parser.expression(parseTree) && parser.inputEmpty()) {
                     //Ausgabe des Syntaxbaumes und des sematischen Wertes
                     parseTree.printSyntaxTree("", true);
+
+                    PDA pda = PDA.getInstance();
+                    PDA.evaluate(parseTree);
+
+                    for(Integer i : pda.getStack()) {
+                        System.out.println(i);
+                    }
+
                     //System.out.println("Korrekter Ausdruck mit Wert:"  +parseTree.value.f(parseTree,UNDEFINED));
                 } else {
                     //Fehlermeldung, falls Ausdruck nicht zu parsen war
@@ -44,6 +54,5 @@ class ArithmetikParserApplication implements TokenList{
                 //Fehlermeldung, falls lexikalische Analyse fehlgeschlagen
                 System.out.println("Fehler in lexikalischer Analyse");
             }
-
 	}//main
 }//ArithmetikParserApplikation

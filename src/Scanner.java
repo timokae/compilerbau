@@ -193,6 +193,7 @@ abstract class Scanner implements TokenList{
 			return false;
 		}
 		System.out.println("Inputstream Size: " + inputStream.size());
+
 		return true;	
 	}//readInput
 	

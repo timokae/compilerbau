@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Arrays;
 
 /*
     ArithmetikParserClass.java
@@ -272,20 +273,30 @@ public class ArithmetikParserClass implements TokenList{
         int c=0;
         try{
             FileReader f=new FileReader(name);
+            int inputIndex = 0;
             for(int i=0;i<256;i++){
                 c = f.read();
                 if (c== -1){
-                    maxPointer=i;
-                    input[i]=EOF;
+                    maxPointer=inputIndex;
+                    input[inputIndex]=EOF;
                     break;
-                }else
-                    input[i]=(char)c;
+                }else if(((char)c)==' '){
+                    // Leerzeichen ueberlesen
+                }else if (((char)c)=='\n'){
+                    // carriage return ueberlesen und Zeilennummer hochzaehlen
+                }else if (c==13){
+                    // linefeed ueberlesen
+                } else {
+                    input[inputIndex] = (char)c;
+                    inputIndex++;
+                }
             }
         }
         catch(Exception e){
             System.out.println("Fehler beim Dateizugriff: "+name);
             return false;
         }
+
         return true;
     }//readInput
 

@@ -103,6 +103,8 @@ class SyntaxTree implements TokenList{
 		}
 		*/
 	}
+
+
 	
 	// Gibt den zum Zahlenwert passenden String des Tokentyps zurueck
 	String getTokenString(){
@@ -175,7 +177,7 @@ class SyntaxTree implements TokenList{
 		}
 		
 	// Gibt die Referenz auf die Liste der Kinder des aktuellen Knotens zurueck
-	LinkedList getChildNodes(){
+	LinkedList<SyntaxTree> getChildNodes(){
 		return this.childNodes;
 		}	
 	
