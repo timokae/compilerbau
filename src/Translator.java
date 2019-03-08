@@ -51,57 +51,85 @@ public class Translator {
         return Translator.instance;
     }
 
-    public static void traverse(SyntaxTree sT) {
-        Translator translator = Translator.getInstance();
+    public static void addNumberToStack(SyntaxTree sT) {
+        // Read all numbers from children and add into one number
+        int[] numbers = Translator.traverserNumber(sT, new int[0]);
 
+        // Add number to stack as instruction
+        Translator.getInstance().addInstruction("LOAD", arrayToNumber(numbers));
+    }
+
+    public static void addOperatorToStack(SyntaxTree sT) {
+        char sign = sT.getCharacter();
+
+        switch (sign) {
+            case '*':
+                Translator.getInstance().addInstruction("MULT");
+                break;
+            case '/':
+                Translator.getInstance().addInstruction("DIV");
+                break;
+            case '+':
+                Translator.getInstance().addInstruction("ADD");
+                break;
+            case '-':
+                Translator.getInstance().addInstruction("SUB");
+                break;
+            case '(':
+                break;
+            case ')':
+                break;
+            default: // char := number
+                break;
+        }
+    }
+
+    public static void traverse(SyntaxTree sT) {
         boolean isTermNode = Translator.isOperatorNode(sT);
 
         // Numbers > 9 consist of several nodes
         if (sT.getTokenString().equals("NUMBER")) {
-            int[] numbers = Translator.traverserNumber(sT, new int[0]);
-            translator.addInstruction("LOAD", arrayToNumber(numbers));
-        } else if (isTermNode) {
-            // first traverse left side
-            Translator.traverse(sT.getChildNodes().get(1));
-
-            // then push operator onto stack
-            Translator.traverse(sT.getChildNodes().get(0));
+            Translator.addNumberToStack(sT);
+        }
+        // Node has an expression/term and has an operator
+        else if (isTermNode) {
+            Translator.traverse(sT.getChildNodes().get(1)); // first traverse left side
+            Translator.traverse(sT.getChildNodes().get(0)); // then push operator onto stack
 
             // at the end traverse right right
             for(int i = 2; i < sT.getChildNodes().size(); i++) {
                 Translator.traverse(sT.getChildNodes().get(i));
             }
-        } else {
-            for(SyntaxTree s : sT.getChildNodes())
+        }
+        // No specific case found
+        else {
+            for(SyntaxTree s : sT.getChildNodes()) {
                 Translator.traverse(s);
+            }
         }
 
+        // INPUT_SIGN reached that is not a number
         if (sT.getTokenString().equals("INPUT_SIGN")) {
-            char sign = sT.getCharacter();
-
-            switch (sign) {
-                case '*':
-                    translator.addInstruction("MULT");
-                    break;
-                case '/':
-                    translator.addInstruction("DIV");
-                    break;
-                case '+':
-                    translator.addInstruction("ADD");
-                    break;
-                case '-':
-                    translator.addInstruction("SUB");
-                    break;
-                case '(':
-                    break;
-                case ')':
-                    break;
-                default: // char := number
-                    break;
-            }
+            addOperatorToStack(sT);
         }
     }
 
+    /*
+        Number (current Node)
+        |-OPERATOR
+            |---NUMBER
+                |---DIGIT
+                   |---INPUT_SIGN:5
+               |---NUMBER
+                  |---DIGIT
+                     |---INPUT_SIGN:0
+                 |---NUMBER
+                     ---DIGIT
+                     ---INPUT_SIGN:0
+
+         Read number of current node and insert into array
+         Traverse through all children and add them to the array
+    */
     public static int[] traverserNumber(SyntaxTree sT, int[] numbers) {
         // Init array with length + 1
         int[] newNumbers = new int[numbers.length + 1];
@@ -117,10 +145,12 @@ public class Translator {
         int nodeNumber = Character.getNumericValue(sT.getChildNodes().get(0).getChildNodes().get(0).getCharacter());
         newNumbers[numberIndex] = nodeNumber;
 
+        // If node has children iterave over them recursively
         if (sT.getChildNodes().size() > 1) {
             return Translator.traverserNumber(sT.getChildNodes().get(1), newNumbers);
         }
 
+        // No children -> return array
         return newNumbers;
     }
 
@@ -136,9 +166,10 @@ public class Translator {
         return result;
     }
 
+    // Returns true if the node has a operator sign and child with an input sign
     private static boolean isOperatorNode(SyntaxTree tree) {
         // node needs to be a term or right_expression
-        boolean isTerm = tree.getTokenString().equals("INPUT_SIGN") || tree.getTokenString().equals("RIGHT_EXPRESSION");
+        boolean isTerm = tree.getTokenString().equals("TERM") || tree.getTokenString().equals("RIGHT_EXPRESSION");
 
         // node needs a 'input_sign' child
         boolean childHasInputSign = false;
