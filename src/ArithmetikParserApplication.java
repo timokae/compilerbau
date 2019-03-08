@@ -13,9 +13,7 @@
 	
 */
 
-
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 class ArithmetikParserApplication implements TokenList{
 	public static void main(String args[]){
@@ -38,12 +36,10 @@ class ArithmetikParserApplication implements TokenList{
                     //Ausgabe des Syntaxbaumes und des sematischen Wertes
                     parseTree.printSyntaxTree("", true);
 
-                    PDA pda = PDA.getInstance();
-                    PDA.evaluate(parseTree);
+                    Translator translator = Translator.getInstance();
+                    Translator.traverse(parseTree);
+                    ArithmetikParserApplication.printInstructions(translator.getInstructions());
 
-                    for(Integer i : pda.getStack()) {
-                        System.out.println(i);
-                    }
 
                     //System.out.println("Korrekter Ausdruck mit Wert:"  +parseTree.value.f(parseTree,UNDEFINED));
                 } else {
@@ -55,4 +51,19 @@ class ArithmetikParserApplication implements TokenList{
                 System.out.println("Fehler in lexikalischer Analyse");
             }
 	}//main
+
+    private static void printInstructions(ArrayList<Translator.Instruction> instructions) {
+        StringBuilder builder = new StringBuilder();
+        for(Translator.Instruction i : instructions) {
+            builder.setLength(0);
+            builder.append(i.getCommand());
+
+            if(i.getPayload() != null) {
+                builder.append(": ");
+                builder.append(i.getPayload());
+            }
+
+            System.out.println(builder.toString());
+        }
+    }
 }//ArithmetikParserApplikation

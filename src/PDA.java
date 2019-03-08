@@ -1,23 +1,24 @@
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class PDA {
     private static PDA instance;
 
-    private LinkedList<Integer> stack;
+    private LinkedList<String> stack;
 
     private PDA() {
         stack = new LinkedList<>();
     }
 
-    public int pop() {
+    public String pop() {
         return stack.pop();
     }
 
-    public void push(int element) {
+    public void push(String element) {
         stack.push(element);
     }
 
-    public LinkedList<Integer> getStack() {
+    public LinkedList<String> getStack() {
         return this.stack;
     }
 
@@ -29,61 +30,73 @@ public class PDA {
         return PDA.instance;
     }
 
-    public static void evaluateNumber(SyntaxTree sT) {
-        PDA pda = PDA.getInstance();
-
-        if (sT.getTokenString().equals("INPUT_SIGN")) {
-            int number = Character.getNumericValue(sT.getCharacter());
-            pda.push(number);
-        }
-    }
-
     public static boolean evaluate(SyntaxTree sT) {
         PDA pda = PDA.getInstance();
 
-        SyntaxTree inputSign = null;
+        ArrayList<SyntaxTree> inputSigns = new ArrayList<>();
         for(SyntaxTree s : sT.getChildNodes()) {
             if (s.getTokenString().equals("INPUT_SIGN")) {
-                inputSign = s;
+                inputSigns.add(s);
             } else {
                 PDA.evaluate(s);
             }
         }
-        if (inputSign != null) {
-            PDA.evaluate(inputSign);
+
+        for(SyntaxTree s : inputSigns) {
+            PDA.evaluate(s);
         }
 
 
         if (sT.getTokenString().equals("INPUT_SIGN")) {
             char sign = sT.getCharacter();
 
-            int a;
-            int b;
+            String a;
+            String b;
+            int result;
+
             switch (sign) {
                 case '*':
                     a = pda.pop();
                     b = pda.pop();
-                    pda.push(a * b);
+                    System.out.println(b + " * " + a);
+                    result = Integer.parseInt(b) * Integer.parseInt(a);
+                    pda.push(String.valueOf(result));
                     break;
                 case '/':
+                    a = pda.pop();
+                    b = pda.pop();
+                    System.out.println(b + " / " + a);
+                    result = Integer.parseInt(b) * Integer.parseInt(a);
+                    pda.push(String.valueOf(result));
                     break;
                 case '+':
                     a = pda.pop();
                     b = pda.pop();
-                    pda.push(a + b);
+                    System.out.println(b + " + " + a);
+                    result = Integer.parseInt(b) + Integer.parseInt(a);
+                    pda.push(String.valueOf(result));
                     break;
                 case '-':
                     a = pda.pop();
                     b = pda.pop();
-                    pda.push(b - a);
+                    System.out.println(b + " - " + a);
+                    result = Integer.parseInt(b) - Integer.parseInt(a);
+                    pda.push(String.valueOf(result));
                     break;
                 case '(':
+                    pda.push("(");
                     break;
                 case ')':
+                    a = pda.pop();
+                    if (!a.equals("(")) {
+                        pda.stack.clear();
+                        System.out.println("Wrong paranthesis");
+                    }
                     break;
                 default: // char := number
-                    pda.push(Character.getNumericValue(sign));
+                    pda.push(Character.toString(sign));
             }
+
         }
 
         return false;
