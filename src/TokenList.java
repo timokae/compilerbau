@@ -33,7 +33,9 @@ interface TokenList {
 				RIGHT_TERM=18,
 				OPERATOR=20,
 				PROGRAM=21,
-				FUNCTION=22;
+				FUNCTION=22,
+				STRING=23;
+
 				
 	// Konstante, die angibt, dass die Semantische Funktion eines Knotens 
 	// undefiniert ist

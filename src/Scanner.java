@@ -107,7 +107,7 @@ abstract class Scanner implements TokenList{
 	// zeiger auf das naechste Zeichen, sonst wird false zurueckgegeben.
 	//-------------------------------------------------------------------------	
 	boolean match(char [] matchSet){
-		System.out.println(Arrays.toString(matchSet));
+		//System.out.println(Arrays.toString(matchSet));
 		for (int i=0;i<matchSet.length;i++)
 			if (inputStream.get(pointer).character==matchSet[i]){
 				System.out.println("match:"+inputStream.get(pointer).character);
@@ -257,8 +257,8 @@ abstract class Scanner implements TokenList{
 				for(int j=0;j<dea.transitions[actualState].length;j++) {
                     if (match(dea.transitions[actualState][j])) {
                         // Eingabewert passt zu Wertemenge des Zustands j
-                        actualState = j;
                         System.out.println(actualState + "->" + j);
+						actualState = j;
                         transitionFound = true;
                         break;
                     }

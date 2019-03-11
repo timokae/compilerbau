@@ -34,7 +34,7 @@ class ArithmetikParserApplication implements TokenList{
 			if (numScanner.lexicalAnalysis()) {
                 //Aufruf des Parsers und Test, ob gesamte Eingabe gelesen
 
-                if (parser.expression(parseTree) && parser.inputEmpty()) {
+           /*     if (parser.expression(parseTree) && parser.inputEmpty()) {
                     //Ausgabe des Syntaxbaumes und des sematischen Wertes
                     parseTree.printSyntaxTree("", true);
 
@@ -49,7 +49,7 @@ class ArithmetikParserApplication implements TokenList{
                 } else {
                     //Fehlermeldung, falls Ausdruck nicht zu parsen war
                     System.out.println("Fehler im Ausdruck");
-                }
+                }*/
             } else {
                 //Fehlermeldung, falls lexikalische Analyse fehlgeschlagen
                 System.out.println("Fehler in lexikalischer Analyse");
