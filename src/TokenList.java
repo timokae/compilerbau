@@ -20,7 +20,7 @@ interface TokenList {
 				START=5,
 				NOT_FINAL=6,
 				KOMMA=7,
-				IDENT=8,
+				Symbol=8,
 				OPEN_PAR=9,
 				CLOSE_PAR=10,
 				PLUS=11,
@@ -34,7 +34,11 @@ interface TokenList {
 				OPERATOR=20,
 				PROGRAM=21,
 				FUNCTION=22,
-				STRING=23;
+				STRING=23,
+				EndState=24
+
+
+						;
 
 				
 	// Konstante, die angibt, dass die Semantische Funktion eines Knotens 

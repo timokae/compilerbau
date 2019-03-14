@@ -1,1 +1,2 @@
-"hallo welt" 15 + 1  IF
+define     150
+if    test
