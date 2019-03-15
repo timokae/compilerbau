@@ -306,7 +306,7 @@ public class ArithmetikParserClass implements TokenList{
     //-------------------------------------------------------------------------
     boolean inputEmpty(){
         if (pointer==maxPointer){
-            ausgabe("Eingabe leer!",0);
+            ausgabe("Eingabe leer! bzw zu am Ende",0);
             return true;
         }else{
             syntaxError("Eingabe bei Ende des Parserdurchlaufs nicht leer");

@@ -107,7 +107,7 @@ abstract class Scanner implements TokenList{
 	// zeiger auf das naechste Zeichen, sonst wird false zurueckgegeben.
 	//-------------------------------------------------------------------------	
 	boolean match(char [] matchSet){
-		System.out.println(Arrays.toString(matchSet));
+		//System.out.println(Arrays.toString(matchSet));
 		for (int i=0;i<matchSet.length;i++)
 			if (inputStream.get(pointer).character==matchSet[i]){
 				System.out.println("match:"+inputStream.get(pointer).character);
@@ -175,7 +175,7 @@ abstract class Scanner implements TokenList{
 				if (c== -1){
 					inputStream.addLast(new InputCharacter(EOF, l));
 					break;
-				}else if(((char)c)==' '){
+				//}else if(((char)c)==' '){
 					// Leerzeichen ueberlesen
 				}else if (((char)c)=='\n'){
 					// carriage return ueberlesen und Zeilennummer hochzaehlen
@@ -218,7 +218,11 @@ abstract class Scanner implements TokenList{
 			if (token==NO_TYPE)
 				return false;
 			// sonst Token in tokenStream eintragen
-			else
+
+			// Wenn der Token nur ein Enstate ist dann soll er nicht in den Tokenstream eingebunden werden
+			else if(token==EndState){
+
+			}else
 				tokenStream.
 				addLast(new Token(token,inputStream.get(pointer-1).line,lexem));
 		}//while
@@ -244,6 +248,7 @@ abstract class Scanner implements TokenList{
 			// Variable, die angibt, ob ein Zustandsuebergang des Automaten erfolgt ist
 			boolean transitionFound=false;
 			int actualState=0;
+			int bufferState=0;
 
 			// aktuelles Lexem mit Leerstring initialisieren
 			lexem="";
@@ -256,11 +261,21 @@ abstract class Scanner implements TokenList{
 				// Folgezustand des DEA zu actualState ermitteln
 				for(int j=0;j<dea.transitions[actualState].length;j++) {
                     if (match(dea.transitions[actualState][j])) {
-                        // Eingabewert passt zu Wertemenge des Zustands j
-                        actualState = j;
-                        System.out.println(actualState + "->" + j);
-                        transitionFound = true;
-                        break;
+						// Eingabewert passt zu Wertemenge des Zustands j
+						System.out.println(actualState + "->" + j);
+
+						if ((dea.states[j] == EndState) && bufferState!=0) {
+						actualState =bufferState;
+							transitionFound = false;
+							break;
+						} else{
+
+						actualState = j;
+						bufferState = actualState;
+						transitionFound = true;
+							break;
+						}
+
                     }
                 }
 			}while(transitionFound);
