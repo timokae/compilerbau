@@ -35,7 +35,8 @@ interface TokenList {
 				PROGRAM=21,
 				FUNCTION=22,
 				STRING=23,
-				EndState=24
+				EndState=24,
+				COMPERATOR=25
 
 
 						;

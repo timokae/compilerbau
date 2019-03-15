@@ -264,7 +264,7 @@ abstract class Scanner implements TokenList{
 						// Eingabewert passt zu Wertemenge des Zustands j
 						System.out.println(actualState + "->" + j);
 
-						if ((dea.states[j] == EndState)&& bufferState!=0) {
+						if ((dea.states[j] == EndState) && bufferState!=0) {
 						actualState =bufferState;
 							transitionFound = false;
 							break;
@@ -274,7 +274,7 @@ abstract class Scanner implements TokenList{
 						bufferState = actualState;
 						transitionFound = true;
 							break;
-					}
+						}
 
                     }
                 }
