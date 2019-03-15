@@ -19,9 +19,10 @@ class NumScanner extends Scanner{
 		//	    											+
 		// NUM := {'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'0'}
 
-		char[] az = {'a','b','c','d','e','f','g','h','i','j','k', 'l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z'};
+		char[] az = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z'};
 		char[] n09 = {'0','1','2','3','4','5','6','7','8','9'};
 		char[] az09 = {'a','b','c','d','e','f','g','h','i','j','k', 'l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z', '0','1','2','3','4','5','6','7','8','9'};
+		char[] all = {'a','b','c','d','e','f','g','h','i','j','k', 'l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z', '0','1','2','3','4','5','6','7','8','9', ' '};
 
 		char transitions[][][]={
 				//              START   KOMMA   SYMBOL  OPEN_PAR    CLOSE_PAR  PLUS     MINUS     MULT     DIV     NUM   Comp0              Comp1   Comp2   String  Enstate
@@ -39,7 +40,7 @@ class NumScanner extends Scanner{
 				/*Comp0*/       {{},    {},     {},     {},         {},        {},      {},       {},      {},     {},   {},                {'='},  {},     {},     {' '}       },
 				/*Comp1*/       {{},    {},     {},     {},         {},        {},      {},       {},      {},     {},   {},                {},     {},     {},     {' '}       },
 				/*Comp2*/       {{},    {},     {},     {},         {},        {},      {},       {},      {},     {},   {},                {},     {},     {},     {}          },
-				/*String*/      {{},    {},     {},     {},         {},        {},      {},       {},      {},     {},   {},                {},     {},     az09,   {'"'}       },
+				/*String*/      {{},    {},     {},     {},         {},        {},      {},       {},      {},     {},   {},                {},     {},     all,   {'"'}        },
 				/*Endstate*/    {{},    {},     {},     {},         {},        {},      {},       {},      {},     {},   {},                {},     {},     {},     {}          }
 		};
 
@@ -54,7 +55,6 @@ class NumScanner extends Scanner{
 	// Implementierung der abstrakten Methode aus der Klasse Scanner
 	String getTokenString(byte token){
 		switch(token){
-            //START   KOMMA   SYMBOL  OPEN_PAR    CLOSE_PAR  PLUS     MINUS     MULT     DIV     NUM   Comp0              Comp1   Comp2   String  Enstate
 			case  1: return "NUMBER";
 			case  5: return "START";
 			case  7: return "KOMMA";
@@ -69,6 +69,9 @@ class NumScanner extends Scanner{
 			case 23: return "String";
 			case 24: return "Enstate";
 			case 25: return "Comperator";
+            case 26: return "IF";
+            case 27: return "DO";
+            case 28: return "END";
 		default: return "";
 		}
 	}

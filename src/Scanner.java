@@ -111,7 +111,11 @@ abstract class Scanner implements TokenList{
 		for (int i=0;i<matchSet.length;i++)
 			if (inputStream.get(pointer).character==matchSet[i]){
 				System.out.println("match:"+inputStream.get(pointer).character);
-				lexem=lexem+inputStream.get(pointer).character;
+
+				char currentChar = inputStream.get(pointer).character;
+				if (!(currentChar == '"' || currentChar == ' '))
+				    lexem=lexem+inputStream.get(pointer).character;
+
 				pointer++;	//Eingabepointer auf das naechste Zeichen setzen
 				return true;		
 			}
@@ -208,28 +212,23 @@ abstract class Scanner implements TokenList{
 	boolean lexicalAnalysis(){
 		char [] EOFSet={EOF};
 		byte token=NO_TYPE;
-		// Eingabe Token f�r Token pr�fen und gefundene Token in tokenStream
-		// eintragen
+		// Eingabe Token für Token prüfen und gefundene Token in tokenStream eintragen
 		while(!match(EOFSet)){
 			token = getNextToken();
-			//System.out.println(getTokenString(token));
-			// falls kein g�ltiges Token gefunden wurde, lexikalische Analyse
-			// abbrechen
-			if (token==NO_TYPE)
+			if (token==NO_TYPE) { 			// falls kein gültiges Token gefunden wurde, lexikalische Analys abbrechen
 				return false;
-			// sonst Token in tokenStream eintragen
+			} else if(token==EndState) { 	// Wenn der Token nur ein Enstate ist dann soll er nicht in den Tokenstream eingebunden werden
 
-			// Wenn der Token nur ein Enstate ist dann soll er nicht in den Tokenstream eingebunden werden
-			else if(token==EndState){
-
-			}else
-				tokenStream.
-				addLast(new Token(token,inputStream.get(pointer-1).line,lexem));
+			} else if(token==Symbol){
+                matchLexem();
+            }
+			else { 						// sonst Token in tokenStream eintragen
+				tokenStream.addLast(new Token(token, inputStream.get(pointer - 1).line, lexem));
+			}
 		}//while
 		// Bei erfolgreichem Scannen, Token Strom mit EOF abschlie�en
 
         for(Token t : tokenStream) {
-            System.out.println("------");
             System.out.println(this.getTokenString(t.token));
             System.out.println(t.lexem);
             System.out.println("Line: " + t.line);
@@ -239,6 +238,19 @@ abstract class Scanner implements TokenList{
 		tokenStream.addLast(new Token((byte)EOF,inputStream.get(pointer-1).line,"EOF"));
 		return true;
 	}//lexicalAnalysis
+
+    private void matchLexem() {
+        switch (lexem.trim()) {
+            case "if":
+                tokenStream.addLast(new Token(IF, inputStream.get(pointer - 1).line, lexem));
+                break;
+            case "do":
+                tokenStream.addLast(new Token(DO, inputStream.get(pointer - 1).line, lexem));
+                break;
+            case "end":
+                tokenStream.addLast(new Token(END, inputStream.get(pointer - 1).line, lexem));
+        }
+    }
 	
 	//-------------------------------------------------------------------------
 	// F�hrt die lexikalische Analyse f�r den n�chsten Token durch und gibt
@@ -265,7 +277,7 @@ abstract class Scanner implements TokenList{
 						System.out.println(actualState + "->" + j);
 
 						if ((dea.states[j] == EndState) && bufferState!=0) {
-						actualState =bufferState;
+						actualState = bufferState;
 							transitionFound = false;
 							break;
 						} else{
