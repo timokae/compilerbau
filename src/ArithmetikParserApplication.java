@@ -28,7 +28,7 @@ class ArithmetikParserApplication implements TokenList{
         // Anlegen des Parsers als Instanz der Klasse ArithmetikParserClass
         ArithmetikParserClass parser = new ArithmetikParserClass(parseTree);
         NumScanner numScanner = new NumScanner();
-        //parser.readInput("tmp.txt");
+        parser.readInput("tmp.txt");
 
         if (numScanner.readInput("tmp.txt")) {
             // lexikalische Analyse durchfuehren
