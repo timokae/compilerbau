@@ -94,7 +94,12 @@ public class PDA {
     public int moveToStack(){
         return goTo(this.pop());
     }
-
+    public void compare(){
+        if (this.pop().equals(this.pop())){
+            this.load(1);
+        }
+        else this.load(0);
+    }
 
 
     public void run(){
@@ -148,6 +153,9 @@ public class PDA {
                 break;
             case"POP":
                 this.pop();
+                break;
+            case"COMPARE":
+                this.compare();
                 break;
 
         }
