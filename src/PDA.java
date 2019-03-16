@@ -105,9 +105,11 @@ public class PDA {
     public void run(){
         int i = 0;
         while (i<program.size()){
-        i = execute(program.get(i),i);
+            i = execute(program.get(i),i);
         }
         System.out.println("Programm completed");
+        if (stack.size() > 0)
+            System.out.println(stack.pop());
     }
     private int execute(Translator.Instruction Instruction, int currentPosition){
         String command = Instruction.getCommand();
