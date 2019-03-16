@@ -25,14 +25,15 @@ class ArithmetikParserApplication implements TokenList{
 
         SyntaxTree parseTree = new SyntaxTree(EXPRESSION);
 
-        // Anlegen des Parsers als Instanz der Klasse ArithmetikParserClass
-        ArithmetikParserClass parser = new ArithmetikParserClass(parseTree);
         NumScanner numScanner = new NumScanner();
-        parser.readInput("tmp.txt");
+        //parser.readInput("tmp.txt");
 
         if (numScanner.readInput("tmp.txt")) {
             // lexikalische Analyse durchfuehren
             if (numScanner.lexicalAnalysis()) {
+
+                // Anlegen des Parsers als Instanz der Klasse ArithmetikParserClass
+                ArithmetikParserClass parser = new ArithmetikParserClass(parseTree, numScanner.tokenStream);
                 //Aufruf des Parsers und Test, ob gesamte Eingabe gelesen
                 if (parser.expression(parseTree) && parser.inputEmpty()) {
                     parseTree.printSyntaxTree("", true);    //Ausgabe des Syntaxbaumes und des sematischen Wertes

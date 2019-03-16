@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.LinkedList;
 
 /*
     ArithmetikParserClass.java
@@ -15,6 +16,7 @@ import java.io.*;
     rightExpression -> '-' term rightExpression
     rightExpression -> Epsilon
     term -> operator rightTerm
+    term -> condition rightTerm
     rightTerm -> '*' operator rightTerm
     rightTerm -> '/' operator rightTerm
     rightTerm -> Epsilon
@@ -22,11 +24,11 @@ import java.io.*;
     num -> digit num | digit
     digit -> '1' | '2' | '3' | '4' | '5' |'6' | '7' | '8' | '9' | '0'
 
-    Epsilon steht hier f�r das "leere Wort"
+    Epsilon steht hier für das "leere Wort"
 
     Der Parser ist nach dem Prinzip des rekursiven Abstiegs programmiert,
     d.h. jedes nicht terminale Symbol der Grammatik wird durch eine
-    Methode in Java repr�sentiert, die die jeweils anderen nicht terminalen
+    Methode in Java repräsentiert, die die jeweils anderen nicht terminalen
     Symbole auf der rechten Seite der Grammatik Regeln ggf. auch rekursiv
     aufruft.
 
@@ -53,7 +55,8 @@ public class ArithmetikParserClass implements TokenList{
     // Zeiger auf das Ende der Eingabe
     private int maxPointer;
     // Eingabe zeichenweise abgelegt
-    private char input[];
+    //private char input[];
+    private LinkedList<Scanner.Token> tokens;
     // Syntaxbaum
     private SyntaxTree parseTree;
 
@@ -61,11 +64,11 @@ public class ArithmetikParserClass implements TokenList{
     //------------Konstruktor der Klasse ArithmetikParserClass-----------------
     //-------------------------------------------------------------------------
 
-    ArithmetikParserClass(SyntaxTree parseTree){
+    ArithmetikParserClass(SyntaxTree parseTree, LinkedList<Scanner.Token> tokens){
         this.parseTree=parseTree;
-        this.input = new char[256];
+        this.tokens = tokens;
         this.pointer=0;
-        this.maxPointer=0;
+        this.maxPointer=tokens.size() - 1;
     }
 
     //-------------------------------------------------------------------------
@@ -79,7 +82,8 @@ public class ArithmetikParserClass implements TokenList{
     boolean expression(SyntaxTree sT){
         return (
                 term(sT.insertSubtree(TERM))
-                        && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+                &&
+                rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
         );
     }//expression
 
@@ -90,19 +94,19 @@ public class ArithmetikParserClass implements TokenList{
     // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
     //-------------------------------------------------------------------------
     boolean rightExpression(SyntaxTree sT){
-        char [] addSet = {'+'};
-        char [] subSet = {'-'};
         SyntaxTree epsilonTree;
 
         // Falls aktuelles Eingabezeichen '+'
-        if (match(addSet,sT)) {
+        if (match(TokenList.PLUS,sT)) {
             //rightExpression -> '+' term rightExpression
             return term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION));
             // Falls aktuelles Eingabezeichen '-'
-        } else if (match(subSet,sT)) {
+        } else if (match(TokenList.MINUS,sT)) {
             //rightExpression -> '-' term rightExpression
             return term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION));
             // sonst
+        } else if (match(TokenList.COMPERATOR, sT)) {
+            return term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_TERM));
         } else {
             //rightExpression ->Epsilon
             epsilonTree = sT.insertSubtree(EPSILON);
@@ -112,18 +116,26 @@ public class ArithmetikParserClass implements TokenList{
 
 
     //-------------------------------------------------------------------------
+    // term -> condition rightTerm
     // term -> operator rightTerm
     // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
     //-------------------------------------------------------------------------
 
     boolean term(SyntaxTree sT){
-
-        //term -> operator rightTerm
-        return (
+        // term -> operator rightTerm
+        if (match(TokenList.IF, sT)) {
+            return (
+                condition(sT.insertSubtree(COMPERATOR))
+                &&
+                conditionBranch(sT.insertSubtree(RIGHT_TERM))
+            );
+        } else {
+            return (
                 operator(sT.insertSubtree(OPERATOR))
-                        &&
-                        rightTerm(sT.insertSubtree(RIGHT_TERM))
-        );
+                &&
+                rightTerm(sT.insertSubtree(RIGHT_TERM))
+            );
+        }
     }//term
 
     //-------------------------------------------------------------------------
@@ -138,7 +150,7 @@ public class ArithmetikParserClass implements TokenList{
         SyntaxTree epsilonTree;
 
         // Falls aktuelles Eingabezeichen '*' oder '/'
-        if (match(multDivSet,sT)) {
+        if (match(TokenList.MULT,sT) || match(TokenList.DIV, sT)) {
             //rightTerm -> '*' operator rightTerm bzw.
             //rightTerm -> '/' operator rightTerm
             return operator(sT.insertSubtree(OPERATOR)) && rightTerm(sT.insertSubtree(RIGHT_TERM));
@@ -149,23 +161,34 @@ public class ArithmetikParserClass implements TokenList{
         }
     }//rightTerm
 
+    boolean conditionBranch(SyntaxTree sT) {
+        if (match(TokenList.DO, sT)) {
+            if (expression(sT.insertSubtree(EXPRESSION)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))) {
+                if (match(TokenList.END, sT)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     //-------------------------------------------------------------------------
     // operator -> '(' expression ')' | num
     // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
     //-------------------------------------------------------------------------
     boolean operator(SyntaxTree sT){
-        char [] openParSet= {'('};
-        char [] closeParSet= {')'};
-        char [] digitSet= {'1','2','3','4','5','6','7','8','9','0'};
+        //char [] openParSet= {'('};
+        //char [] closeParSet= {')'};
+        //char [] digitSet= {'1','2','3','4','5','6','7','8','9','0'};
 
         // Falls aktuelle Eingabe '('
-        if (match(openParSet,sT)) {
+        if (match(TokenList.OPEN_PAR,sT)) {
             //operator -> '(' expression ')'
             if (expression(sT.insertSubtree(EXPRESSION))){
                 // Fallunterscheidung erm�glicht, den wichtigen Fehler einer
                 // fehlenden geschlossenen Klammer gesondert auszugeben
-                if(match(closeParSet,sT)) {
+                if(match(TokenList.CLOSE_PAR,sT)) {
                     return true;
                 } else {//Syntaxfehler
                     syntaxError("Geschlossene Klammer erwartet");
@@ -179,12 +202,19 @@ public class ArithmetikParserClass implements TokenList{
         } else if (num(sT.insertSubtree(NUM))) {
             //operator -> num
             return true;
-            // wenn das nicht m�glich ...
         } else { //Syntaxfehler
             syntaxError("Ziffer oder Klammer auf erwartet");
             return false;
         }
     }//operator
+
+    boolean condition(SyntaxTree sT) {
+        return (
+            num(sT.insertSubtree(NUM))
+            &&
+            rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+        );
+    }
 
 
     //-------------------------------------------------------------------------
@@ -192,14 +222,11 @@ public class ArithmetikParserClass implements TokenList{
     // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
     //-------------------------------------------------------------------------
     boolean num(SyntaxTree sT){
-        char [] digitSet = {'1','2','3','4','5','6','7','8','9','0'};
-
-        if (lookAhead(digitSet)) {
-            //num->digit num
-            return digit(sT.insertSubtree(DIGIT))&& num(sT.insertSubtree(NUM));
+        if (match(TokenList.NUM, sT)) {
+            return true;
         } else {
-            //num->digit
-            return digit(sT.insertSubtree(DIGIT));
+            syntaxError("Ziffer erwartet");
+            return false;
         }
     }//num
 
@@ -209,9 +236,9 @@ public class ArithmetikParserClass implements TokenList{
     // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
     //-------------------------------------------------------------------------
     boolean digit(SyntaxTree sT){
-        char [] matchSet = {'1','2','3','4','5','6','7','8','9','0'};
+        //char [] matchSet = {'1','2','3','4','5','6','7','8','9','0'};
 
-        if (match(matchSet,sT)){            //digit->'1'|'2'...|'9'|'0'
+        if (match(TokenList.DIGIT,sT)){            //digit->'1'|'2'...|'9'|'0'
             return true;                  // korrekte Ableitung der Regel m�glich
         }else{
             syntaxError("Ziffer erwartet"); // korrekte Ableitung der Regel
@@ -229,18 +256,16 @@ public class ArithmetikParserClass implements TokenList{
     // Ist das der Fall, so gibt match() true zur�ck und setzt den Eingabe-
     // zeiger auf das n�chste Zeichen, sonst wird false zur�ckgegeben.
     //-------------------------------------------------------------------------
-    boolean match(char [] matchSet, SyntaxTree sT){
+    boolean match(byte token, SyntaxTree sT){
         SyntaxTree node;
-        for (int i=0;i<matchSet.length;i++) {
-            if (input[pointer]==matchSet[i]){
-                //Eingabezeichen als entsprechendem Knoten des Syntaxbaumes
-                //eintragen
-                node=sT.insertSubtree(INPUT_SIGN);
-                node.setCharacter(input[pointer]);
 
-                pointer++;	//Eingabepointer auf das n�chste Zeichen setzen
-                return true;
-            }
+        if (tokens.get(pointer).token==token){
+            //Eingabezeichen als entsprechendem Knoten des Syntaxbaumes eintragen
+            node=sT.insertSubtree(INPUT_SIGN);
+            node.setCharacter(tokens.get(pointer).lexem);
+
+            pointer++;	//Eingabepointer auf das n�chste Zeichen setzen
+            return true;
         }
 
         return false;
@@ -251,6 +276,7 @@ public class ArithmetikParserClass implements TokenList{
     //unter den Zeichen ist, die als Parameter (aheadSet) �bergeben wurden.
     //Der Eingabepointer wird nicht ver�ndert!
     //-------------------------------------------------------------------------
+    /*
     boolean lookAhead(char [] aheadSet){
         for (int i=0;i<aheadSet.length;i++) {
             if (input[pointer+1]==aheadSet[i]) {
@@ -259,46 +285,7 @@ public class ArithmetikParserClass implements TokenList{
         }
         return false;
     }//lookAhead
-
-
-    //-------------------------------------------------------------------------
-    // Methode zum zeichenweise Einlesen der Eingabes aus
-    // einer Eingabedatei mit dem Namen "testdatei.txt".
-    // Die Metode ber�cksichtigt beim Einlesen schon die maximale Gr�sse
-    // des Arrays input von 256 Zeichen.
-    // Das Ende der Eingabe wird mit EOF markiert
-    //-------------------------------------------------------------------------
-    boolean readInput(String name){
-        int c=0;
-        try{
-            FileReader f=new FileReader(name);
-            int inputIndex = 0;
-            for(int i=0;i<256;i++){
-                c = f.read();
-                if (c== -1){
-                    maxPointer=inputIndex;
-                    input[inputIndex]=EOF;
-                    break;
-                }else if(((char)c)==' '){
-                    // Leerzeichen ueberlesen
-                }else if (((char)c)=='\n'){
-                    // carriage return ueberlesen und Zeilennummer hochzaehlen
-                }else if (c==13){
-                    // linefeed ueberlesen
-                } else {
-                    input[inputIndex] = (char)c;
-                    inputIndex++;
-                }
-            }
-        }
-        catch(Exception e){
-            System.out.println("Fehler beim Dateizugriff: "+name);
-            return false;
-        }
-
-        return true;
-    }//readInput
-
+    */
 
     //-------------------------------------------------------------------------
     // Methode, die testet, ob das Ende der Eingabe erreicht ist
@@ -332,12 +319,12 @@ public class ArithmetikParserClass implements TokenList{
     //-------------------------------------------------------------------------
     void syntaxError(String s){
         char z;
-        if (input[pointer]==EOF)
-            System.out.println("Syntax Fehler beim "+(pointer+1)+". Zeichen: "
-                    +"EOF");
-        else
-            System.out.println("Syntax Fehler beim "+(pointer+1)+". Zeichen: "
-                    +input[pointer]);
+        if (pointer >= tokens.size()) {
+            System.out.println("Syntax Fehler beim " + (pointer + 1) + ". Zeichen: EOF");
+        } else {
+            System.out.println("Syntax Fehler beim " + (pointer + 1) + ". Zeichen: " + tokens.get(pointer).token);
+            System.out.println(tokens.get(pointer).lexem);
+        }
         System.out.println(s);
     }//syntaxError
 

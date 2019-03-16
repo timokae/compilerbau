@@ -39,7 +39,8 @@ interface TokenList {
 				COMPERATOR=25,
 				IF=26,
                 DO=27,
-                END=28;
+                END=28,
+				WHILE=29;
 
 				
 	// Konstante, die angibt, dass die Semantische Funktion eines Knotens 
