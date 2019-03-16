@@ -1,104 +1,165 @@
-import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 public class PDA {
     private static PDA instance;
 
+    //new linked list which contains all commands
+
+    private ArrayList<Translator.Instruction> program;
     private LinkedList<String> stack;
 
-    private PDA() {
+    private HashMap<String, Integer> labelList = new HashMap<String, Integer>();
+
+
+    /*public PDA() {
+
         stack = new LinkedList<>();
+    }*/
+    public PDA(ArrayList<Translator.Instruction> program) {
+
+        stack = new LinkedList<>();
+        this.program = program;
     }
 
+    private void label(String labelName, int commandLine)
+    {
+        this.labelList.put (labelName, commandLine);
+    }
+    private int goTo (String labelName) {
+        return labelList.get(labelName);
+    }
+    private int goTrue(String labelName){
+        if (Integer.parseInt(this.pop())==0){
+            return labelList.get(labelName);
+        }
+        else return -1;
+    }
+    private int goFalse(String labelName){
+        if (Integer.parseInt(this.pop())!=0){
+            return labelList.get(labelName);
+        }
+        else return -1;
+    }
+
+    //ggf. private setzten? ggf. nicht benötigt
     public String pop() {
         return stack.pop();
     }
 
-    public void push(String element) {
+    public void load(String element){
         stack.push(element);
     }
-
+    //to load integers
+    public void load(Integer element) {
+        stack.push(element.toString());
+    }
+    // momentan ncht verwendet
     public LinkedList<String> getStack() {
         return this.stack;
     }
 
-    public static PDA getInstance() {
+    //momentan nicht verwednet
+    /*public static PDA getInstance() {
         if (PDA.instance == null) {
             PDA.instance = new PDA();
         }
 
         return PDA.instance;
+    }*/
+
+    public void add()
+    {
+        this.load(Integer.parseInt(this.pop())+Integer.parseInt(this.pop()));
+    }
+    public void sub()
+    {
+        this.load(Integer.parseInt(this.pop())-Integer.parseInt(this.pop()));
+    }
+    public void mul()
+    {
+        this.load(Integer.parseInt(this.pop())*Integer.parseInt(this.pop()));
+    }
+    public void div()
+    {
+        this.load(Integer.parseInt(this.pop())/Integer.parseInt(this.pop()));
+    }
+    private void printElement(Integer element){
+        System.out.println(element);
+    }
+    public void move(String labelName){
+        this.load(labelName);
+    }
+    public int moveToStack(){
+        return goTo(this.pop());
     }
 
-    public static boolean evaluate(SyntaxTree sT) {
-        PDA pda = PDA.getInstance();
 
-        ArrayList<SyntaxTree> inputSigns = new ArrayList<>();
-        for(SyntaxTree s : sT.getChildNodes()) {
-            if (s.getTokenString().equals("INPUT_SIGN")) {
-                inputSigns.add(s);
-            } else {
-                PDA.evaluate(s);
-            }
+
+    public void run(){
+        int i = 0;
+        while (i<program.size()){
+        i = execute(program.get(i),i);
         }
-
-        for(SyntaxTree s : inputSigns) {
-            PDA.evaluate(s);
-        }
-
-
-        if (sT.getTokenString().equals("INPUT_SIGN")) {
-            char sign = sT.getCharacter();
-
-            String a;
-            String b;
-            int result;
-
-            switch (sign) {
-                case '*':
-                    a = pda.pop();
-                    b = pda.pop();
-                    System.out.println(b + " * " + a);
-                    result = Integer.parseInt(b) * Integer.parseInt(a);
-                    pda.push(String.valueOf(result));
-                    break;
-                case '/':
-                    a = pda.pop();
-                    b = pda.pop();
-                    System.out.println(b + " / " + a);
-                    result = Integer.parseInt(b) * Integer.parseInt(a);
-                    pda.push(String.valueOf(result));
-                    break;
-                case '+':
-                    a = pda.pop();
-                    b = pda.pop();
-                    System.out.println(b + " + " + a);
-                    result = Integer.parseInt(b) + Integer.parseInt(a);
-                    pda.push(String.valueOf(result));
-                    break;
-                case '-':
-                    a = pda.pop();
-                    b = pda.pop();
-                    System.out.println(b + " - " + a);
-                    result = Integer.parseInt(b) - Integer.parseInt(a);
-                    pda.push(String.valueOf(result));
-                    break;
-                case '(':
-                    pda.push("(");
-                    break;
-                case ')':
-                    a = pda.pop();
-                    if (!a.equals("(")) {
-                        pda.stack.clear();
-                        System.out.println("Wrong paranthesis");
-                    }
-                    break;
-                default: // char := number
-                    pda.push(Character.toString(sign));
-            }
+        System.out.println("Programm completed");
+    }
+    private int execute(Translator.Instruction Instruction, int currentPosition){
+        String command = Instruction.getCommand();
+        Integer ret = -1;
+        switch (command) {
+            case "ADD":
+                this.add();
+                break;
+            case "SUB":
+                this.sub();
+                break;
+            case "MUL":
+                this.mul();
+                break;
+            case"DIV":
+                this.div();
+                break;
+            case"LOAD":
+                this.load(Integer.parseInt(Instruction.getPayload()));
+                break;
+            case "LABEL":
+                this.label("Instruction.getLabelPayload",currentPosition);
+                break;
+            case"GOTO":
+                ret = this.goTo("Instruction.getLabelpayload");
+                break;
+            case"GOTRUE":
+                ret = this.goTrue("Instruction.getLabelpayload");
+                break;
+            case "GOFALSE":
+                ret = this.goFalse("Instruction.getLabelpayload");
+                break;
+            case"PRINTINT":
+                this.printElement(Integer.parseInt(Instruction.getPayload()));
+            case"HALT":
+                ret = program.size(); //Jumps beyond the end of the programm thus ending the while loop used in run
+                break;
+            case"MOVE":
+                this.move(Instruction.getPayload());
+                break;
+            case"MOVETOSTACK":
+                ret = this.moveToStack();
+                break;
+            case"POP":
+                this.pop();
+                break;
 
         }
-
-        return false;
+            if (ret == -1){
+            return currentPosition+1;
+        }else {
+            return ret;
+        }
+    }
+    public void outputList(ArrayList<Translator.Instruction> program ){
+        for (Translator.Instruction elements : program){
+            System.out.println("C:" +elements.getCommand()+"P: "+elements.getPayload());
+        }
     }
 }
