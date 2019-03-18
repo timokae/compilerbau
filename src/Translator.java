@@ -87,7 +87,7 @@ public class Translator {
         }
     }
 
-    public static void addConditionToStack(SyntaxTree sT) {
+    public static void addIfToStack(SyntaxTree sT) {
         String comp1 = Translator.getFirstComp(sT);
         String comp2 = Translator.getSecondComp(sT);
         String comparator = Translator.getComparator(sT);
@@ -95,8 +95,24 @@ public class Translator {
         Translator.getInstance().addInstruction("LOAD", comp1);
         Translator.getInstance().addInstruction("LOAD", comp2);
         Translator.getInstance().addInstruction("COMPARE", comparator);
-        Translator.getInstance().addInstruction("GOFALSE", "out");
+        Translator.getInstance().addInstruction("GOTRUE", "out");
         Translator.traverse(sT.getChild(2));
+        Translator.getInstance().addInstruction("OUT");
+        Translator.getInstance().addInstruction("LABEL", "out");
+    }
+
+    public static void addWhileToStack(SyntaxTree sT) {
+        String comp1 = Translator.getFirstComp(sT);
+        String comp2 = Translator.getSecondComp(sT);
+        String comparator = Translator.getComparator(sT);
+
+        Translator.getInstance().addInstruction("LABEL test");
+        Translator.getInstance().addInstruction("LOAD", comp1);
+        Translator.getInstance().addInstruction("LOAD", comp2);
+        Translator.getInstance().addInstruction("COMPARE", comparator);
+        Translator.getInstance().addInstruction("GOTRUE", "out");
+        Translator.traverse(sT.getChild(2));
+        Translator.getInstance().addInstruction("GOTO test");
         Translator.getInstance().addInstruction("LABEL", "out");
     }
 
@@ -114,12 +130,13 @@ public class Translator {
 
     public static void traverse(SyntaxTree sT) {
 
-        boolean isConditionNode = Translator.isConditionNode(sT);
         boolean isTermNode = Translator.isOperatorNode(sT);
 
-        if (isConditionNode) {
-            Translator.addConditionToStack(sT);
-        } else if (sT.getTokenString().equals("NUMBER")) { // Numbers > 9 consist of several nodes
+        if (isIfCondition(sT)) {
+            Translator.addIfToStack(sT);
+        } else if (isWhileLoop(sT)) {
+            Translator.addWhileToStack(sT);
+        }else if (sT.getTokenString().equals("NUMBER")) { // Numbers > 9 consist of several nodes
             Translator.addNumberToStack(sT);
         } else if (isTermNode) { // Node has an expression/term and has an operator
             Translator.traverse(sT.getChildNodes().get(1)); // first traverse left side
@@ -160,12 +177,23 @@ public class Translator {
         return isTerm && childHasInputSign;
     }
 
-    private static boolean isConditionNode(SyntaxTree tree) {
+    private static boolean isIfCondition(SyntaxTree tree) {
         if (tree.getChildNodes().size() > 0) {
             boolean isTerm = tree.getTokenString().equals("TERM");
             boolean isCondition = tree.getChild(0).getCharacter().equals("if");
 
             return isTerm && isCondition;
+        }
+
+        return false;
+    }
+
+    private static boolean isWhileLoop(SyntaxTree tree) {
+        if (tree.getChildNodes().size() > 0) {
+            boolean isTerm = tree.getTokenString().equals("TERM");
+            boolean isWhile = tree.getChild(0).getCharacter().equals("while");
+
+            return isTerm && isWhile;
         }
 
         return false;

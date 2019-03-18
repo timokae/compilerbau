@@ -249,6 +249,12 @@ abstract class Scanner implements TokenList{
                 break;
             case "end":
                 tokenStream.addLast(new Token(END, inputStream.get(pointer - 1).line, lexem));
+                break;
+			case "while":
+				tokenStream.addLast(new Token(WHILE, inputStream.get(pointer - 1).line, lexem));
+				break;
+            case "define":
+                tokenStream.addLast(new Token(DEFINE, inputStream.get(pointer - 1).line, lexem));
         }
     }
 	

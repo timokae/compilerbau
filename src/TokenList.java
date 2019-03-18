@@ -40,8 +40,8 @@ interface TokenList {
 				IF=26,
                 DO=27,
                 END=28,
-				WHILE=29;
-
+				WHILE=29,
+				DEFINE=30;
 				
 	// Konstante, die angibt, dass die Semantische Funktion eines Knotens 
 	// undefiniert ist

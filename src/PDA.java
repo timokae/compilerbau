@@ -94,13 +94,18 @@ public class PDA {
     public int moveToStack(){
         return goTo(this.pop());
     }
-
+    public void compare(){
+        if (this.pop().equals(this.pop())){
+            this.load(1);
+        }
+        else this.load(0);
+    }
 
 
     public void run(){
         int i = 0;
         while (i<program.size()){
-        i = execute(program.get(i),i);
+            i = execute(program.get(i),i);
         }
         System.out.println("Programm completed");
     }
@@ -149,12 +154,20 @@ public class PDA {
             case"POP":
                 this.pop();
                 break;
+            case"COMPARE":
+                this.compare();
+                break;
 
         }
-            if (ret == -1){
+        if (ret == -1){
             return currentPosition+1;
         }else {
             return ret;
+        }
+    }
+    public void outputList(ArrayList<Translator.Instruction> program ){
+        for (Translator.Instruction elements : program){
+            System.out.println("C:" +elements.getCommand()+"P: "+elements.getPayload());
         }
     }
 }
