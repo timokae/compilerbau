@@ -42,9 +42,6 @@ class ArithmetikParserApplication implements TokenList{
                     Translator.traverse(parseTree);
 
                     ArithmetikParserApplication.printInstructions(translator.getInstructions());
-
-                    PDA pda = new PDA(Translator.getInstance().getInstructions());
-                    pda.run();
                 } else {
                     System.out.println("Fehler im Ausdruck"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
                 } // expression
