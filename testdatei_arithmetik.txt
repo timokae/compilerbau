@@ -1,1 +1,6 @@
-1 + 2
+function main 1
+    1 + 2
+end
+function test 2
+    4 + 5
+end

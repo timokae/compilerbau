@@ -182,7 +182,7 @@ abstract class Scanner implements TokenList{
 				//}else if(((char)c)==' '){
 					// Leerzeichen ueberlesen
 				}else if (((char)c)=='\n'){
-					//inputStream.addLast(new InputCharacter('\n', l));// carriage return ueberlesen und Zeilennummer hochzaehlen
+					inputStream.addLast(new InputCharacter('\n', l));// carriage return ueberlesen und Zeilennummer hochzaehlen
 					l++;
 				}else if (c==13){
 					// linefeed ueberlesen

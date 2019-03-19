@@ -1,4 +1,8 @@
 import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /*
@@ -59,21 +63,82 @@ public class ArithmetikParserClass implements TokenList{
     private LinkedList<Scanner.Token> tokens;
     // Syntaxbaum
     private SyntaxTree parseTree;
+    public HashMap<String, LinkedList<Scanner.Token>> tokenLists;
+    public HashMap<String, SyntaxTree> treeList;
 
     //-------------------------------------------------------------------------
     //------------Konstruktor der Klasse ArithmetikParserClass-----------------
     //-------------------------------------------------------------------------
 
-    ArithmetikParserClass(SyntaxTree parseTree, LinkedList<Scanner.Token> tokens){
-        this.parseTree=parseTree;
-        this.tokens = tokens;
-        this.pointer=0;
-        this.maxPointer=tokens.size() - 1;
+    ArithmetikParserClass(SyntaxTree parseTree, LinkedList<Scanner.Token> tokenStream){
+        tokenLists = new HashMap<>();
+        treeList = new HashMap<>();
+
+        String function_name = "";
+        int i = 0;
+        while(i < tokenStream.size()) {
+            Scanner.Token token = tokenStream.get(i);
+
+            if (token.token == FUNCTION) {
+                function_name = tokenStream.get(++i).lexem;
+                tokenLists.put(function_name, new LinkedList<>());
+                i++;
+            }
+
+            if (tokenStream.get(i).token != -1){
+                tokenLists.get(function_name).add(tokenStream.get(i));
+            }
+
+            i++;
+        }
+
+        Iterator it = tokenLists.entrySet().iterator();
+        while (it.hasNext()) {
+            HashMap.Entry pair = (HashMap.Entry)it.next();
+            System.out.println(pair.getKey());
+            for(Scanner.Token t : tokenLists.get(pair.getKey())) {
+                System.out.println(t.token + ": " + t.lexem);
+            }
+
+            System.out.println("--------");
+
+            this.tokens = tokenLists.get(pair.getKey());
+            this.pointer = 0;
+            this.parseTree = new SyntaxTree(FUNCTION);
+
+            if(this.tokens.getLast().token == END) {
+                Scanner.Token t = this.tokens.getLast();
+                t.token = -1;
+                t.lexem = "EOF";
+            } else if(this.tokens.getLast().token == -1) {
+                this.tokens.remove(this.tokens.size() - 1);
+            }
+
+
+            this.maxPointer = this.tokens.size() - 1;
+            this.init(this.parseTree);
+            treeList.put(pair.getKey().toString(), this.parseTree);
+
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+
+        //this.parseTree=parseTree;
+        //this.tokens = tokens;
+        //this.pointer=0;
+        //this.maxPointer=tokens.size() - 1;
     }
 
     //-------------------------------------------------------------------------
     //-------------------Methoden der Grammatik--------------------------------
     //-------------------------------------------------------------------------
+
+    boolean init(SyntaxTree sT) {
+        return (
+            parameter(sT.insertSubtree(PARAMETER))
+            &&
+            expression(sT.insertSubtree(EXPRESSION))
+        );
+    }
 
     //-------------------------------------------------------------------------
     // expression -> term rightExpression
@@ -82,8 +147,8 @@ public class ArithmetikParserClass implements TokenList{
     boolean expression(SyntaxTree sT){
         return (
                 term(sT.insertSubtree(TERM))
-                &&
-                rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+                        &&
+                        rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
         );
     }//expression
 
@@ -125,28 +190,28 @@ public class ArithmetikParserClass implements TokenList{
         // term -> operator rightTerm
         if (match(TokenList.IF, sT)) {
             return (
-                condition(sT.insertSubtree(COMPERATOR))
-                &&
-                conditionBranch(sT.insertSubtree(RIGHT_TERM))
+                    condition(sT.insertSubtree(COMPERATOR))
+                            &&
+                            conditionBranch(sT.insertSubtree(RIGHT_TERM))
             );
         } else if (match(TokenList.DEFINE, sT)) {
             return (
-                symbol(sT.insertSubtree(SYMBOL))
-                &&
-                expression(sT.insertSubtree(EXPRESSION))
+                    symbol(sT.insertSubtree(SYMBOL))
+                            &&
+                            expression(sT.insertSubtree(EXPRESSION))
             );
         }
         else if (match(TokenList.ASSIGN, sT)) {
             return (
-                symbol(sT.insertSubtree(SYMBOL))
-                &&
-                expression(sT.insertSubtree(EXPRESSION))
+                    symbol(sT.insertSubtree(SYMBOL))
+                            &&
+                            expression(sT.insertSubtree(EXPRESSION))
             );
         } else {
             return (
-                operator(sT.insertSubtree(OPERATOR))
-                &&
-                rightTerm(sT.insertSubtree(RIGHT_TERM))
+                    operator(sT.insertSubtree(OPERATOR))
+                            &&
+                            rightTerm(sT.insertSubtree(RIGHT_TERM))
             );
         }
     }//term
@@ -223,9 +288,9 @@ public class ArithmetikParserClass implements TokenList{
 
     boolean condition(SyntaxTree sT) {
         return (
-            num(sT.insertSubtree(NUM))
-            &&
-            rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+                num(sT.insertSubtree(NUM))
+                        &&
+                        rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
         );
     }
 
@@ -258,6 +323,15 @@ public class ArithmetikParserClass implements TokenList{
             return true;
         } else{
             syntaxError("String erwartet");
+            return false;
+        }
+    }
+
+    boolean parameter(SyntaxTree sT) {
+        if (match(TokenList.NUM, sT)) {
+            return true;
+        } else {
+            syntaxError("Ziffer erwartet");
             return false;
         }
     }

@@ -34,11 +34,16 @@ class ArithmetikParserApplication implements TokenList{
 
                 // Anlegen des Parsers als Instanz der Klasse ArithmetikParserClass
                 ArithmetikParserClass parser = new ArithmetikParserClass(parseTree, numScanner.tokenStream);
+                for(String key : parser.treeList.keySet()) {
+                    SyntaxTree tree = parser.treeList.get(key);
+                    tree.printSyntaxTree("", true);
+                }
                 //Aufruf des Parsers und Test, ob gesamte Eingabe gelesen
+                /*
                 if (parser.expression(parseTree) && parser.inputEmpty()) {
                     parseTree.printSyntaxTree("", true);    //Ausgabe des Syntaxbaumes und des sematischen Wertes
 
-                    /*
+
                     Translator translator = Translator.getInstance();
                     Translator.traverse(parseTree);
 
@@ -48,10 +53,11 @@ class ArithmetikParserApplication implements TokenList{
                     pda.outputList(Translator.getInstance().getInstructions());
                     pda.outputHashmap();
                     pda.run();
-                    */
+
                 } else {
                     System.out.println("Fehler im Ausdruck"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
                 } // expression
+                */
 
             } else {
                 System.out.println("Fehler in lexikalischer Analyse"); //Fehlermeldung, falls lexikalische Analyse fehlgeschlagen
@@ -126,7 +132,7 @@ class ArithmetikParserApplication implements TokenList{
                 System.out.println(replaceEmojis(s));
 
                 writer.write(replaceEmojis(s));
-                writer.newLine();
+                writer.write("\n");
 
                 // read next line
                 line = reader.readLine();

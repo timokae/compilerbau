@@ -130,6 +130,7 @@ class SyntaxTree implements TokenList{
 			case 25:    return "COMPARATOR";
             case 31:    return "ASSIGN";
             case 22:    return "FUNCTION";
+            case 32:    return "PARAMETER";
 			default:    return "";
 		}
 	}
