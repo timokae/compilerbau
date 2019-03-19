@@ -109,31 +109,31 @@ class SyntaxTree implements TokenList{
 	// Gibt den zum Zahlenwert passenden String des Tokentyps zurueck
 	String getTokenString(){
 		switch(this.token){
-			case 0: return "NO_TYPE";
-			case 9: return "OPEN_PAR";
-			case 10: return "CLOSE_PAR";
-			case 15: return "EXPRESSION";
-			case 16: return "RIGHT_EXPRESSION";
-			case 17: return "TERM";
-			case 18: return "RIGHT_TERM";
-			case 1: return "NUMBER";
-			case 20: return "OPERATOR";
-			case 7: return "KOMMA";
-			case 3: return "INPUT_SIGN";
-			case 4: return "EPSILON";
-			case 11: return "PLUS";
-			case 12: return "MINUS";
-			case 13: return "MULT";
-			case 14: return "DIV";
-			case 8: return "IDENT";
-			case 2: return "DIGIT";
-			case 25: return "COMPARATOR";
-			default: return "";
+			case 0:     return "NO_TYPE";
+			case 9:     return "OPEN_PAR";
+			case 10:    return "CLOSE_PAR";
+			case 15:    return "EXPRESSION";
+			case 16:    return "RIGHT_EXPRESSION";
+			case 17:    return "TERM";
+			case 18:    return "RIGHT_TERM";
+			case 1:     return "NUMBER";
+			case 20:    return "OPERATOR";
+			case 7:     return "KOMMA";
+			case 3:     return "INPUT_SIGN";
+			case 4:     return "EPSILON";
+			case 11:    return "PLUS";
+			case 12:    return "MINUS";
+			case 13:    return "MULT";
+			case 14:    return "DIV";
+			case 8:     return "SYMBOL";
+			case 2:     return "DIGIT";
+			case 25:    return "COMPARATOR";
+            case 31:    return "ASSIGN";
+            case 22:    return "FUNCTION";
+			default:    return "";
 		}
 	}
-	
-	
-	
+
 	// Bestimmt und speichert die semantsiche Funktion des Kontens in
 	// Abhaengigkeit vom Knotentyp
 	void setSemantikFunction(byte b){

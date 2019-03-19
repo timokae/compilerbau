@@ -182,7 +182,7 @@ abstract class Scanner implements TokenList{
 				//}else if(((char)c)==' '){
 					// Leerzeichen ueberlesen
 				}else if (((char)c)=='\n'){
-					// carriage return ueberlesen und Zeilennummer hochzaehlen
+					//inputStream.addLast(new InputCharacter('\n', l));// carriage return ueberlesen und Zeilennummer hochzaehlen
 					l++;
 				}else if (c==13){
 					// linefeed ueberlesen
@@ -219,7 +219,7 @@ abstract class Scanner implements TokenList{
 				return false;
 			} else if(token==EndState) { 	// Wenn der Token nur ein Enstate ist dann soll er nicht in den Tokenstream eingebunden werden
 
-			} else if(token==Symbol){
+			} else if(token==SYMBOL){
                 matchLexem();
             }
 			else { 						// sonst Token in tokenStream eintragen
@@ -255,6 +255,13 @@ abstract class Scanner implements TokenList{
 				break;
             case "define":
                 tokenStream.addLast(new Token(DEFINE, inputStream.get(pointer - 1).line, lexem));
+                break;
+            case "function":
+                tokenStream.add(new Token(FUNCTION, inputStream.get(pointer - 1).line, lexem));
+                break;
+            default:
+                tokenStream.addLast(new Token(SYMBOL, inputStream.get(pointer - 1).line, lexem));
+                break;
         }
     }
 	

@@ -38,6 +38,7 @@ class ArithmetikParserApplication implements TokenList{
                 if (parser.expression(parseTree) && parser.inputEmpty()) {
                     parseTree.printSyntaxTree("", true);    //Ausgabe des Syntaxbaumes und des sematischen Wertes
 
+                    /*
                     Translator translator = Translator.getInstance();
                     Translator.traverse(parseTree);
 
@@ -45,7 +46,9 @@ class ArithmetikParserApplication implements TokenList{
 
                     PDA pda = new PDA(Translator.getInstance().getInstructions());
                     pda.outputList(Translator.getInstance().getInstructions());
+                    pda.outputHashmap();
                     pda.run();
+                    */
                 } else {
                     System.out.println("Fehler im Ausdruck"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
                 } // expression
@@ -90,6 +93,15 @@ class ArithmetikParserApplication implements TokenList{
                     break;
                 case "😵":
                     builder.append("end");
+                    break;
+                case "✍️":
+                    builder.append("define");
+                    break;
+                case "👏":
+                    builder.append("~");
+                    break;
+                case "🧐":
+                    builder.append("function");
                     break;
                 default:
                     builder.append(word);

@@ -129,6 +129,19 @@ public class ArithmetikParserClass implements TokenList{
                 &&
                 conditionBranch(sT.insertSubtree(RIGHT_TERM))
             );
+        } else if (match(TokenList.DEFINE, sT)) {
+            return (
+                symbol(sT.insertSubtree(SYMBOL))
+                &&
+                expression(sT.insertSubtree(EXPRESSION))
+            );
+        }
+        else if (match(TokenList.ASSIGN, sT)) {
+            return (
+                symbol(sT.insertSubtree(SYMBOL))
+                &&
+                expression(sT.insertSubtree(EXPRESSION))
+            );
         } else {
             return (
                 operator(sT.insertSubtree(OPERATOR))
@@ -217,6 +230,7 @@ public class ArithmetikParserClass implements TokenList{
     }
 
 
+
     //-------------------------------------------------------------------------
     // num -> digit num | digit
     // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
@@ -229,6 +243,24 @@ public class ArithmetikParserClass implements TokenList{
             return false;
         }
     }//num
+
+    boolean symbol(SyntaxTree sT) {
+        if (match(TokenList.SYMBOL, sT)) {
+            return true;
+        } else {
+            syntaxError("Symbol erwartet");
+            return false;
+        }
+    }
+
+    boolean word(SyntaxTree sT) {
+        if (match(TokenList.STRING, sT)) {
+            return true;
+        } else{
+            syntaxError("String erwartet");
+            return false;
+        }
+    }
 
 
     //-------------------------------------------------------------------------

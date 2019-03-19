@@ -9,7 +9,6 @@ public class PDA {
 
     private ArrayList<Translator.Instruction> program;
     private LinkedList<String> stack;
-
     private HashMap<String, Integer> labelList = new HashMap<String, Integer>();
 
 
@@ -69,10 +68,7 @@ public class PDA {
         return PDA.instance;
     }*/
 
-    public void add()
-    {
-        this.load(Integer.parseInt(this.pop())+Integer.parseInt(this.pop()));
-    }
+    public void add()    {this.load(Integer.parseInt(this.pop())+Integer.parseInt(this.pop()));}
     public void sub()
     {
         this.load(Integer.parseInt(this.pop())-Integer.parseInt(this.pop()));
@@ -85,27 +81,55 @@ public class PDA {
     {
         this.load(Integer.parseInt(this.pop())/Integer.parseInt(this.pop()));
     }
-    private void printElement(Integer element){
-        System.out.println(element);
-    }
     public void move(String labelName){
         this.load(labelName);
     }
     public int moveToStack(){
         return goTo(this.pop());
     }
-    public void compare(){
-        if (this.pop().equals(this.pop())){
-            this.load(1);
+
+    public void compare(String comperator){
+        switch(comperator) {
+            //comparing element 1 (loaded first) to element 2 (loaded most recent)
+            case ">":
+                if (Integer.parseInt(this.pop())< Integer.parseInt(this.pop())) {
+                    this.load(1);
+                } else this.load(0);
+                break;
+            case "<":
+                if (Integer.parseInt(this.pop())> Integer.parseInt(this.pop())) {
+                    this.load(1);
+                } else this.load(0);
+                break;
+            case "==":
+                if (this.pop().equals(this.pop())) {
+                    this.load(1);
+                } else this.load(0);
+                break;
         }
-        else this.load(0);
+
+    }
+
+    //removes and prints an element from the stack.
+    public void out(){
+        System.out.println(this.pop());
     }
 
 
     public void run(){
         int i = 0;
+        //create Labels
         while (i<program.size()){
-            i = execute(program.get(i),i);
+            if (program.get(i).getCommand().equals("LABEL"))
+            {
+                i = execute(program.get(i),i);
+            }else i++;
+        }
+
+        //run the actual program
+        int j = 0;
+        while (j<program.size()){
+            j = execute(program.get(j),j);
         }
         System.out.println("Programm completed");
     }
@@ -129,19 +153,17 @@ public class PDA {
                 this.load(Integer.parseInt(Instruction.getPayload()));
                 break;
             case "LABEL":
-                this.label("Instruction.getLabelPayload",currentPosition);
+                this.label(Instruction.getPayload(),currentPosition);
                 break;
             case"GOTO":
-                ret = this.goTo("Instruction.getLabelpayload");
+                ret = this.goTo(Instruction.getPayload());
                 break;
             case"GOTRUE":
-                ret = this.goTrue("Instruction.getLabelpayload");
+                ret = this.goTrue(Instruction.getPayload());
                 break;
             case "GOFALSE":
-                ret = this.goFalse("Instruction.getLabelpayload");
+                ret = this.goFalse(Instruction.getPayload());
                 break;
-            case"PRINTINT":
-                this.printElement(Integer.parseInt(Instruction.getPayload()));
             case"HALT":
                 ret = program.size(); //Jumps beyond the end of the programm thus ending the while loop used in run
                 break;
@@ -155,7 +177,10 @@ public class PDA {
                 this.pop();
                 break;
             case"COMPARE":
-                this.compare();
+                this.compare(Instruction.getPayload());
+                break;
+            case"OUT":
+                this.out();
                 break;
 
         }
@@ -168,6 +193,16 @@ public class PDA {
     public void outputList(ArrayList<Translator.Instruction> program ){
         for (Translator.Instruction elements : program){
             System.out.println("C:" +elements.getCommand()+"P: "+elements.getPayload());
+        }
+    }
+    public void outputHashmap(){
+        for (String name: labelList.keySet()){
+
+            String key =name.toString();
+            String value = labelList.get(name).toString();
+            System.out.println(key + " " + value);
+
+
         }
     }
 }
