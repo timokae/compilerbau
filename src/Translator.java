@@ -7,10 +7,18 @@ public class Translator {
     public class Instruction {
         private String command;
         private String payload;
+        private String labelPayload;
+        private String namePayload;
 
         public Instruction(String command, String payload) {
             this.command = command;
             this.payload = payload;
+        }
+        public Instruction(String command, String payload,String labelPayload,String namePayload) {
+            this.command = command;
+            this.payload = payload;
+            this.labelPayload = labelPayload;
+            this.namePayload = namePayload;
         }
 
         public Instruction(String command) {
@@ -24,6 +32,9 @@ public class Translator {
         public String getPayload() {
             return this.payload;
         }
+
+        public String getLabelPayload(){return this.labelPayload;}
+        public String getNamePayload() {return this.namePayload;}
     }
 
     private static Translator instance;
@@ -36,6 +47,7 @@ public class Translator {
     public void addInstruction(String command, String payload) {
         instructions.add(new Instruction(command, payload));
     }
+    public void addInstruction(String command,String payLoad, String labelPayload,String namePayload){ instructions.add(new Instruction(command,payLoad,labelPayload,namePayload));}
 
     public void addInstruction(String command) {
         instructions.add(new Instruction(command));
@@ -92,8 +104,10 @@ public class Translator {
         String comp2 = Translator.getSecondComp(sT);
         String comparator = Translator.getComparator(sT);
 
+
         Translator.getInstance().addInstruction("LOAD", comp1);
         Translator.getInstance().addInstruction("LOAD", comp2);
+        //Compare liefert 0 für true
         Translator.getInstance().addInstruction("COMPARE", comparator);
         Translator.getInstance().addInstruction("GOTRUE", "out");
         Translator.traverse(sT.getChild(2));
@@ -114,6 +128,8 @@ public class Translator {
         Translator.traverse(sT.getChild(2));
         Translator.getInstance().addInstruction("GOTO test");
         Translator.getInstance().addInstruction("LABEL", "out");
+        Translator.getInstance().addInstruction("HALT");
+
     }
 
     public static String getFirstComp(SyntaxTree sT) {
@@ -199,4 +215,3 @@ public class Translator {
         return false;
     }
 }
-
