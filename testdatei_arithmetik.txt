@@ -1,5 +1,8 @@
 function main 1
-    define a (5 + 1)
-    define b 6
-    define c 7
+    define a (5+1)
+
+    if a > 4 do
+        assign a 1
+        call test 1
+    end
 end

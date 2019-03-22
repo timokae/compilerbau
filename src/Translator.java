@@ -44,6 +44,10 @@ public class Translator {
         this.instructions = new ArrayList<>();
     }
 
+    //-------------------------------------------------------------------------
+    //-------------------Add Instruction Functions-----------------------------
+    //-------------------------------------------------------------------------
+
     public void addInstruction(String command, String payload) {
         instructions.add(new Instruction(command, payload));
     }
@@ -65,10 +69,14 @@ public class Translator {
         return Translator.instance;
     }
 
+    //-------------------------------------------------------------------------
+    //-------------------Add To Stack Functions--------------------------------
+    //-------------------------------------------------------------------------
+
     public static void addNumberToStack(SyntaxTree sT) {
         // Read all numbers from children and add into one number
         //int[] numbers = Translator.traverserNumber(sT, new int[0]);
-        int number = Integer.valueOf(sT.getChildNodes().getFirst().getCharacter());
+        int number = Integer.valueOf(sT.getCharacter());
 
         // Add number to stack as instruction
         Translator.getInstance().addInstruction("LOAD", String.valueOf(number));
@@ -94,7 +102,7 @@ public class Translator {
                 break;
             case ")":
                 break;
-            default: // char := number
+            default:
                 break;
         }
     }
@@ -134,7 +142,7 @@ public class Translator {
 
     public static void addDefineToStack(SyntaxTree tree) {
         String symbol = tree.getChild(0).getChild(0).getCharacter();
-        Translator.traverse(tree.getChild(1));
+        Translator.traverseTerm(tree.getChild(1));
 
         Translator.getInstance().addInstruction("ADDSYMBOL", "", "null", symbol);
     }
@@ -159,6 +167,10 @@ public class Translator {
         Translator.traverse(tree.getChild(1));
     }
 
+    //-------------------------------------------------------------------------
+    //-------------------Traverse Functions------------------------------------
+    //-------------------------------------------------------------------------
+
     public static void traverse(SyntaxTree sT) {
         boolean isTermNode = Translator.isOperatorNode(sT);
 
@@ -177,7 +189,7 @@ public class Translator {
         else if (isWhileLoop(sT)) {
             Translator.addWhileToStack(sT);
         }
-        else if (sT.getTokenString().equals("NUMBER")) { // Numbers > 9 consist of several nodes
+        /*else if (sT.getTokenString().equals("NUMBER")) { // Numbers > 9 consist of several nodes
             Translator.addNumberToStack(sT);
         }
         else if (isTermNode) { // Node has an expression/term and has an operator
@@ -189,6 +201,7 @@ public class Translator {
                 Translator.traverse(sT.getChildNodes().get(i));
             }
         }
+        */
         // No specific case found
         else {
             for(SyntaxTree s : sT.getChildNodes()) {
@@ -197,9 +210,51 @@ public class Translator {
         }
 
         // INPUT_SIGN reached that is not a number
-        if (sT.getTokenString().equals("INPUT_SIGN")) {
+        /*if (sT.getTokenString().equals("INPUT_SIGN")) {
             addOperatorToStack(sT);
         }
+        */
+    }
+
+    public static void traverseTerm(SyntaxTree tree) {
+        // operator rightTerm
+        traverseOperator(tree.getChild(0));
+        traverseRightTerm(tree.getChild(1));
+    }
+
+    public static void traverseOperator(SyntaxTree tree) {
+        // ( term rightExpression )
+        if (tree.getChildNodes().size() == 4) {
+            traverseTerm(tree.getChild(1));
+            traverseRightTerm(tree.getChild(2));
+        } else if (tree.getChildNodes().size() == 2) {
+            addNumberToStack(tree.getChild(0).getChild(0).getChild(0));
+            traverseRightTerm(tree.getChild(1));
+        }
+        else {
+            addNumberToStack(tree.getChild(0).getChild(0));
+        }
+    }
+
+    public static void traverseRightTerm(SyntaxTree tree) {
+        if (tree.getChild(0).getToken() != TokenList.EPSILON) {
+            traverseOperator(tree.getChild(1));
+            addOperatorToStack(tree.getChild(0));
+            traverseRightTerm(tree.getChild(2));
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    //-------------------Node Matching FUnctions-------------------------------
+    //-------------------------------------------------------------------------
+
+    private static boolean hasOperatorSign(SyntaxTree tree) {
+        return (
+            tree.getToken() == TokenList.PLUS
+            || tree.getToken() == TokenList.MINUS
+            || tree.getToken() == TokenList.MULT
+            || tree.getToken() == TokenList.DIV
+        );
     }
 
     // Returns true if the node has a operator sign and child with an input sign
@@ -230,7 +285,13 @@ public class Translator {
         return tree.getToken() == TokenList.WHILE;
     }
 
-    // Helper Functions
+    private static boolean isTerm(SyntaxTree tree) {
+        return tree.getToken() == TokenList.TERM;
+    }
+
+    //-------------------------------------------------------------------------
+    //-------------------Helper Functions--------------------------------------
+    //-------------------------------------------------------------------------
 
     private static String getFirstComp(SyntaxTree sT) {
         // From comparision node
