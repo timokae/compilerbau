@@ -1,4 +1,4 @@
-expression  -> define right_expression | assign right_expression | call right_expression | comparator right_expression | term right_expression
+expression  -> define right_expression | assign right_expression | call right_expression | 'if' comparator right_expression | 'while' comparator right_expression | term right_expression
 
 define      -> 'symbol' 'symbol' | 'symbol' num
 
@@ -6,7 +6,7 @@ assign      -> 'symbol' 'symbol' | 'symbol' num
 
 call        -> 'symbol' num
 
-comparator  -> 'if' comparision expression | 'while' comparison expression
+comparator  -> comparision expression
 
 comparision -> num comp num
 

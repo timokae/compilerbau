@@ -46,7 +46,7 @@ class NumScanner extends Scanner{
 
 		//				--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		// Zustaende zum DEA
-		byte states[]={START, KOMMA, SYMBOL, OPEN_PAR, CLOSE_PAR, PLUS, MINUS, MULT, DIV, NUM, COMPERATOR, COMPERATOR, ASSIGN, STRING, EndState};
+		byte states[]={START, KOMMA, SYMBOL, OPEN_PAR, CLOSE_PAR, PLUS, MINUS, MULT, DIV, NUM, COMPARISION, COMPARISION, ASSIGN, STRING, EndState};
 		// Instanz des DEA anlegen
 		this.dea=new DEA(transitions, states);
 	}
@@ -68,7 +68,7 @@ class NumScanner extends Scanner{
 			case 22: return "FUNCTION";
 			case 23: return "String";
 			case 24: return "Enstate";
-			case 25: return "Comperator";
+			case 25: return "Comparision";
             case 26: return "IF";
             case 27: return "DO";
             case 28: return "END";

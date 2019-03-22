@@ -129,10 +129,6 @@ public class ArithmetikParserClass implements TokenList{
             it.remove(); // avoids a ConcurrentModificationException
         }
 
-        //this.parseTree=parseTree;
-        //this.tokens = tokens;
-        //this.pointer=0;
-        //this.maxPointer=tokens.size() - 1;
         return true;
     }
 
@@ -148,172 +144,205 @@ public class ArithmetikParserClass implements TokenList{
         );
     }
 
-    //-------------------------------------------------------------------------
-    // expression -> term rightExpression
-    // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
-    //-------------------------------------------------------------------------
     boolean expression(SyntaxTree sT){
-        if (match(TokenList.IF, sT)) {
+        if (compareToken(TokenList.DEFINE, sT)) {
             return (
-                    condition(sT.insertSubtree(COMPERATOR))
-                            &&
-                            conditionBranch(sT.insertSubtree(RIGHT_TERM))
-            );
-        } else if (match(TokenList.DEFINE, sT)) {
-            return (
-                    symbol(sT.insertSubtree(SYMBOL))
+                    define(sT.insertSubtree(DEFINE))
                     &&
-                    expression(sT.insertSubtree(EXPRESSION))
+                    rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
             );
-        }
-        else if (match(TokenList.ASSIGN, sT)) {
+        } else if (compareToken(TokenList.ASSIGN, sT)) {
             return (
-                    symbol(sT.insertSubtree(SYMBOL))
-                            &&
-                            expression(sT.insertSubtree(EXPRESSION))
+                assign(sT.insertSubtree(ASSIGN))
+                &&
+                rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
             );
-        } else if (match(TokenList.CALL, sT)) {
+        } else if (compareToken(TokenList.CALL, sT)) {
             return (
-                 symbol(sT.insertSubtree(SYMBOL))
+                 call(sT.insertSubtree(CALL))
                  &&
-                 num(sT.insertSubtree(NUM))
+                 rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
             );
-        } else {
+        } else if (compareToken(TokenList.IF, sT)) {
             return (
-                    term(sT.insertSubtree(TERM))
-                            &&
-                            rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+                comparator(sT.insertSubtree(IF))
+                &&
+                rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+            );
+        } else if (compareToken(TokenList.WHILE, sT)) {
+            return (
+                comparator(sT.insertSubtree(WHILE))
+                &&
+                rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+            );
+        } else if (compareToken(CALL, sT)) {
+            return (
+                call(sT.insertSubtree(CALL))
+                &&
+                rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
             );
         }
-    }//expression
-
-
-    //-------------------------------------------------------------------------
-    // rightExpression -> '+' term rightExpression |
-    //                    '-' term rightExpression | Epsilon
-    // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
-    //-------------------------------------------------------------------------
-    boolean rightExpression(SyntaxTree sT){
-        SyntaxTree epsilonTree;
-
-        // Falls aktuelles Eingabezeichen '+'
-        if (match(TokenList.PLUS,sT)) {
-            //rightExpression -> '+' term rightExpression
-            return term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION));
-            // Falls aktuelles Eingabezeichen '-'
-        } else if (match(TokenList.MINUS,sT)) {
-            //rightExpression -> '-' term rightExpression
-            return term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION));
-            // sonst
-        } else if (match(TokenList.COMPERATOR, sT)) {
-            return term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_TERM));
-        } else {
-            //rightExpression ->Epsilon
-            epsilonTree = sT.insertSubtree(EPSILON);
+        else {
+            sT.insertSubtree(EPSILON);
             return true;
         }
-    }//rightExpression
+    }
 
-
-    //-------------------------------------------------------------------------
-    // term -> condition rightTerm
-    // term -> operator rightTerm
-    // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
-    //-------------------------------------------------------------------------
-
-    boolean term(SyntaxTree sT){
-        // term -> operator rightTerm
-        return (
-            operator(sT.insertSubtree(OPERATOR))
-            &&
-            rightTerm(sT.insertSubtree(RIGHT_TERM))
-        );
-    }//term
-
-    //-------------------------------------------------------------------------
-    // rightTerm -> '*' operator rightTerm |
-    //              '/' operator rightTerm | Epsilon
-    // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
-    //-------------------------------------------------------------------------
-
-    boolean rightTerm(SyntaxTree sT){
-        char [] multDivSet = {'*','/'};
-        char [] divSet = {'/'};
-        SyntaxTree epsilonTree;
-
-        // Falls aktuelles Eingabezeichen '*' oder '/'
-        if (match(TokenList.MULT,sT) || match(TokenList.DIV, sT)) {
-            //rightTerm -> '*' operator rightTerm bzw.
-            //rightTerm -> '/' operator rightTerm
-            return operator(sT.insertSubtree(OPERATOR)) && rightTerm(sT.insertSubtree(RIGHT_TERM));
-        } else {
-            //rightTerm ->Epsilon
-            epsilonTree = sT.insertSubtree(EPSILON);
-            return true;
-        }
-    }//rightTerm
-
-    boolean conditionBranch(SyntaxTree sT) {
-        if (match(TokenList.DO, sT)) {
-            if (expression(sT.insertSubtree(EXPRESSION)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))) {
-                if (match(TokenList.END, sT)) {
-                    return true;
-                }
+    boolean define(SyntaxTree sT) {
+        if (symbol(sT.insertSubtree(SYMBOL))) {
+            if (inPlaceCompareToken(TokenList.SYMBOL,sT)) {
+                return symbol(sT.insertSubtree(SYMBOL));
+            } else if (num(sT.insertSubtree(NUM))) {
+                return true;
             }
         }
 
         return false;
     }
 
-    //-------------------------------------------------------------------------
-    // operator -> '(' expression ')' | num
-    // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
-    //-------------------------------------------------------------------------
-    boolean operator(SyntaxTree sT){
-        //char [] openParSet= {'('};
-        //char [] closeParSet= {')'};
-        //char [] digitSet= {'1','2','3','4','5','6','7','8','9','0'};
+    boolean assign(SyntaxTree sT) {
+        if (symbol(sT.insertSubtree(SYMBOL))) {
+            if (inPlaceCompareToken(TokenList.SYMBOL,sT)) {
+                return symbol(sT.insertSubtree(SYMBOL));
+            } else if (num(sT.insertSubtree(NUM))) {
+                return true;
+            }
+        }
 
-        // Falls aktuelle Eingabe '('
+        return false;
+    }
+
+    boolean call(SyntaxTree sT) {
+        if (match(TokenList.SYMBOL, sT)) {
+            if (match(TokenList.NUM, sT)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    boolean comparator(SyntaxTree sT) {
+        return (
+            comparision(sT.insertSubtree(COMPARISION))
+            &&
+            conditionBranch(sT.insertSubtree(EXPRESSION))
+        );
+    }
+
+    boolean comparision(SyntaxTree sT) {
+        /*if (match(TokenList.NUM, sT) || match(TokenList.SYMBOL, sT)) {
+            if (match(TokenList.COMPARISION, sT)) {
+                if (match(TokenList.NUM, sT) || match(TokenList.SYMBOL, sT)) {
+                    return true;
+                }
+            }
+        }
+        */
+
+        boolean first = false;
+        boolean second = false;
+        boolean third = false;
+
+        if (inPlaceCompareToken(TokenList.SYMBOL,sT)) {
+            first = symbol(sT.insertSubtree(SYMBOL));
+        } else if (num(sT.insertSubtree(NUM))) {
+            first = true;
+        }
+
+        if (match(TokenList.COMPARISION, sT)) {
+            second = true;
+        }
+
+        if (inPlaceCompareToken(TokenList.SYMBOL,sT)) {
+            third = symbol(sT.insertSubtree(SYMBOL));
+        } else if (num(sT.insertSubtree(NUM))) {
+            third = true;
+        }
+
+        return first && second && third;
+    }
+
+    boolean conditionBranch(SyntaxTree sT) {
+        if (match(TokenList.DO, sT)) {
+            if (expression(sT.insertSubtree(EXPRESSION)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))) {
+               if (match(TokenList.END, sT)) {
+                   return true;
+               }
+            }
+        }
+
+        return false;
+    }
+
+    boolean rightExpression(SyntaxTree sT){
+        if (match(TokenList.PLUS,sT)) {
+            return (
+                term(sT.insertSubtree(TERM))
+                &&
+                rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+            );
+        } else if (match(TokenList.MINUS,sT)) {
+            return (
+                term(sT.insertSubtree(TERM))
+                &&
+                rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+            );
+        } else if (match(TokenList.COMPARISION, sT)) {
+            return (
+                term(sT.insertSubtree(TERM))
+                &&
+                rightExpression(sT.insertSubtree(RIGHT_TERM))
+            );
+        } else {
+            return (expression(sT));
+        }
+    }
+
+    boolean term(SyntaxTree sT){
+        return (
+            operator(sT.insertSubtree(OPERATOR))
+            &&
+            rightTerm(sT.insertSubtree(RIGHT_TERM))
+        );
+    }
+
+    boolean rightTerm(SyntaxTree sT){
+        if (match(TokenList.MULT,sT) || match(TokenList.DIV, sT)) {
+            return (
+                operator(sT.insertSubtree(OPERATOR))
+                &&
+                rightTerm(sT.insertSubtree(RIGHT_TERM))
+            );
+        } else {
+            SyntaxTree epsilonTree = sT.insertSubtree(EPSILON);
+            return true;
+        }
+    }
+
+    boolean operator(SyntaxTree sT){
         if (match(TokenList.OPEN_PAR,sT)) {
-            //operator -> '(' expression ')'
             if (expression(sT.insertSubtree(EXPRESSION))){
-                // Fallunterscheidung erm�glicht, den wichtigen Fehler einer
-                // fehlenden geschlossenen Klammer gesondert auszugeben
+
                 if(match(TokenList.CLOSE_PAR,sT)) {
                     return true;
-                } else {//Syntaxfehler
+                } else {
                     syntaxError("Geschlossene Klammer erwartet");
                     return false;
                 }
+
             }else{
                 syntaxError("Fehler in geschachtelter Expression");
                 return false;
             }
-            // sonst versuchen nach digit abzuleiten
         } else if (num(sT.insertSubtree(NUM))) {
-            //operator -> num
             return true;
-        } else { //Syntaxfehler
+        } else {
             syntaxError("Ziffer oder Klammer auf erwartet");
             return false;
         }
-    }//operator
-
-    boolean condition(SyntaxTree sT) {
-        return (
-            num(sT.insertSubtree(NUM))
-            &&
-            rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
-        );
     }
 
-
-
-    //-------------------------------------------------------------------------
-    // num -> digit num | digit
-    // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
-    //-------------------------------------------------------------------------
     boolean num(SyntaxTree sT){
         if (match(TokenList.NUM, sT)) {
             return true;
@@ -321,22 +350,13 @@ public class ArithmetikParserClass implements TokenList{
             syntaxError("Ziffer erwartet");
             return false;
         }
-    }//num
+    }
 
     boolean symbol(SyntaxTree sT) {
         if (match(TokenList.SYMBOL, sT)) {
             return true;
         } else {
             syntaxError("Symbol erwartet");
-            return false;
-        }
-    }
-
-    boolean word(SyntaxTree sT) {
-        if (match(TokenList.STRING, sT)) {
-            return true;
-        } else{
-            syntaxError("String erwartet");
             return false;
         }
     }
@@ -349,22 +369,6 @@ public class ArithmetikParserClass implements TokenList{
             return false;
         }
     }
-
-
-    //-------------------------------------------------------------------------
-    // digit -> '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'0'
-    // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
-    //-------------------------------------------------------------------------
-    boolean digit(SyntaxTree sT){
-        //char [] matchSet = {'1','2','3','4','5','6','7','8','9','0'};
-
-        if (match(TokenList.DIGIT,sT)){            //digit->'1'|'2'...|'9'|'0'
-            return true;                  // korrekte Ableitung der Regel m�glich
-        }else{
-            syntaxError("Ziffer erwartet"); // korrekte Ableitung der Regel
-            return false;                   // nicht m�glich
-        }
-    }//digit
 
     //-------------------------------------------------------------------------
     //-------------------Hilfsmethoden-----------------------------------------
@@ -390,6 +394,19 @@ public class ArithmetikParserClass implements TokenList{
 
         return false;
     }//match
+
+    boolean compareToken(byte token, SyntaxTree sT){
+        if (tokens.get(pointer).token==token){
+            pointer++;
+            return true;
+        }
+
+        return false;
+    }//match
+
+    boolean inPlaceCompareToken(byte token, SyntaxTree sT) {
+        return tokens.get(pointer).token==token;
+    }
 
     //-------------------------------------------------------------------------
     //Methode, die testet, ob das auf das aktuelle Zeichen folgende Zeichen

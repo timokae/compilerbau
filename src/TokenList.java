@@ -36,7 +36,7 @@ interface TokenList {
 				FUNCTION=22,
 				STRING=23,
 				EndState=24,
-				COMPERATOR=25,
+				COMPARISION=25,
 				IF=26,
                 DO=27,
                 END=28,

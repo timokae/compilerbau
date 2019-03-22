@@ -127,10 +127,14 @@ class SyntaxTree implements TokenList{
 			case 14:    return "DIV";
 			case 8:     return "SYMBOL";
 			case 2:     return "DIGIT";
-			case 25:    return "COMPARATOR";
+			case 25:    return "COMPARISION";
+			case 30:	return "DEFINE";
             case 31:    return "ASSIGN";
             case 22:    return "FUNCTION";
             case 32:    return "PARAMETER";
+			case 26:	return "IF";
+			case 29:	return "WHILE";
+            case 33:    return "CALL";
 			default:    return "";
 		}
 	}

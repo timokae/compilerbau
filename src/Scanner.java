@@ -262,6 +262,9 @@ abstract class Scanner implements TokenList{
             case "call":
                 tokenStream.add(new Token(CALL, inputStream.get(pointer - 1).line, lexem));
                 break;
+			case "assign":
+				tokenStream.add(new Token(ASSIGN, inputStream.get(pointer - 1).line, lexem));
+				break;
             default:
                 tokenStream.addLast(new Token(SYMBOL, inputStream.get(pointer - 1).line, lexem));
                 break;
