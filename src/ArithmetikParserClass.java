@@ -192,7 +192,7 @@ public class ArithmetikParserClass implements TokenList{
         if (symbol(sT.insertSubtree(SYMBOL))) {
             if (inPlaceCompareToken(TokenList.SYMBOL,sT)) {
                 return symbol(sT.insertSubtree(SYMBOL));
-            } else if (num(sT.insertSubtree(NUM))) {
+            } else if (term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))) {
                 return true;
             }
         }
@@ -204,7 +204,7 @@ public class ArithmetikParserClass implements TokenList{
         if (symbol(sT.insertSubtree(SYMBOL))) {
             if (inPlaceCompareToken(TokenList.SYMBOL,sT)) {
                 return symbol(sT.insertSubtree(SYMBOL));
-            } else if (num(sT.insertSubtree(NUM))) {
+            } else if (term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))) {
                 return true;
             }
         }
@@ -231,15 +231,6 @@ public class ArithmetikParserClass implements TokenList{
     }
 
     boolean comparision(SyntaxTree sT) {
-        /*if (match(TokenList.NUM, sT) || match(TokenList.SYMBOL, sT)) {
-            if (match(TokenList.COMPARISION, sT)) {
-                if (match(TokenList.NUM, sT) || match(TokenList.SYMBOL, sT)) {
-                    return true;
-                }
-            }
-        }
-        */
-
         boolean first = false;
         boolean second = false;
         boolean third = false;
@@ -322,7 +313,7 @@ public class ArithmetikParserClass implements TokenList{
 
     boolean operator(SyntaxTree sT){
         if (match(TokenList.OPEN_PAR,sT)) {
-            if (expression(sT.insertSubtree(EXPRESSION))){
+            if (term(sT.insertSubtree(TERM)) && rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))){
 
                 if(match(TokenList.CLOSE_PAR,sT)) {
                     return true;

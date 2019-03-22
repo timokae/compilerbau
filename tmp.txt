@@ -1,13 +1,5 @@
-function test 2
-    assign b 4
-end
 function main 1
-    define b 3
-    assign a 2
-
-    if a < 2 do
-        assign a 5
-    end
-
-    call test 5
+    define a (5 + 1)
+    define b 6
+    define c 7
 end

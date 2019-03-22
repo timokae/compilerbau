@@ -49,6 +49,8 @@ class ArithmetikParserApplication implements TokenList{
                         SyntaxTree tree = parser.treeList.get(key);
                         Translator.startTraverse(tree);
                         ArithmetikParserApplication.printInstructions(translator.getInstructions());
+                        PDA pda = new PDA(Translator.getInstance().getInstructions());
+                        pda.printSymbolTable();
                         Translator.getInstance().instructions.clear();
                     }
 
@@ -74,10 +76,24 @@ class ArithmetikParserApplication implements TokenList{
         for (Translator.Instruction i : instructions) {
             builder.setLength(0);
             builder.append(i.getCommand());
+            builder.append("    ");
 
             if (i.getPayload() != null) {
-                builder.append(": ");
+                builder.append("Payload: ");
                 builder.append(i.getPayload());
+                builder.append(" ");
+            }
+
+            if (i.getLabelPayload() != null) {
+                builder.append("Label: ");
+                builder.append(i.getLabelPayload());
+                builder.append(" ");
+            }
+
+            if (i.getNamePayload() != null) {
+                builder.append("Name: ");
+                builder.append(i.getNamePayload());
+                builder.append(" ");
             }
 
             System.out.println(builder.toString());

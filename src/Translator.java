@@ -100,9 +100,9 @@ public class Translator {
     }
 
     public static void addIfToStack(SyntaxTree sT) {
-        String comp1 = Translator.getFirstComp(sT);
-        String comp2 = Translator.getSecondComp(sT);
-        String comparator = Translator.getComparator(sT);
+        String comp1 = Translator.getFirstComp(sT.getChild(0));
+        String comp2 = Translator.getSecondComp(sT.getChild(0));
+        String comparator = Translator.getComparator(sT.getChild(0));
 
 
         Translator.getInstance().addInstruction("LOAD", comp1);
@@ -110,7 +110,7 @@ public class Translator {
         //Compare liefert 0 für true
         Translator.getInstance().addInstruction("COMPARE", comparator);
         Translator.getInstance().addInstruction("GOTRUE", "out");
-        Translator.traverse(sT.getChild(2));
+        Translator.traverse(sT.getChild(1));
         Translator.getInstance().addInstruction("OUT");
         Translator.getInstance().addInstruction("LABEL", "out");
     }
@@ -132,16 +132,25 @@ public class Translator {
 
     }
 
-    public static String getFirstComp(SyntaxTree sT) {
-        return sT.getChild(1).getChild(0).getChild(0).getCharacter();
+    public static void addDefineToStack(SyntaxTree tree) {
+        String symbol = tree.getChild(0).getChild(0).getCharacter();
+        Translator.traverse(tree.getChild(1));
+
+        Translator.getInstance().addInstruction("ADDSYMBOL", "", "null", symbol);
     }
 
-    public static String getSecondComp(SyntaxTree sT) {
-        return sT.getChild(1).getChild(1).getChild(1).getChild(0).getChild(0).getChild(0).getCharacter();
+    public static void addAssignToStack(SyntaxTree tree) {
+        Translator.addDefineToStack(tree);
     }
 
-    public static String getComparator(SyntaxTree sT) {
-        return sT.getChild(1).getChild(1).getChild(0).getCharacter();
+    public static void addCallToStack(SyntaxTree tree) {
+        String functionName = tree.getChild(0).getCharacter();
+        String parameter = tree.getChild(1).getCharacter();
+
+        Translator.getInstance().addInstruction("ADDSYMBOL", parameter, "back1", functionName + "1");
+        Translator.getInstance().addInstruction("LOADSYMBOLLABEL", functionName + "1");
+        Translator.getInstance().addInstruction("GOTO", functionName);
+        Translator.getInstance().addInstruction("LABEL", "back1");
     }
 
     public static void startTraverse(SyntaxTree tree) {
@@ -153,13 +162,25 @@ public class Translator {
     public static void traverse(SyntaxTree sT) {
         boolean isTermNode = Translator.isOperatorNode(sT);
 
-        if (isIfCondition(sT)) {
+        if (isDefine(sT)) {
+            Translator.addDefineToStack(sT);
+        }
+        else if (isAssign(sT)) {
+            Translator.addAssignToStack(sT);
+        }
+        else if (isCall(sT)) {
+            Translator.addCallToStack(sT);
+        }
+        else if (isIfCondition(sT)) {
             Translator.addIfToStack(sT);
-        } else if (isWhileLoop(sT)) {
+        }
+        else if (isWhileLoop(sT)) {
             Translator.addWhileToStack(sT);
-        }else if (sT.getTokenString().equals("NUMBER")) { // Numbers > 9 consist of several nodes
+        }
+        else if (sT.getTokenString().equals("NUMBER")) { // Numbers > 9 consist of several nodes
             Translator.addNumberToStack(sT);
-        } else if (isTermNode) { // Node has an expression/term and has an operator
+        }
+        else if (isTermNode) { // Node has an expression/term and has an operator
             Translator.traverse(sT.getChildNodes().get(1)); // first traverse left side
             Translator.traverse(sT.getChildNodes().get(0)); // then push operator onto stack
 
@@ -184,39 +205,43 @@ public class Translator {
     // Returns true if the node has a operator sign and child with an input sign
     private static boolean isOperatorNode(SyntaxTree tree) {
         // node needs to be a term or right_expression
-        boolean isTerm = tree.getTokenString().equals("TERM") || tree.getTokenString().equals("RIGHT_EXPRESSION");
+        return tree.getToken() == TokenList.TERM;
+    }
 
-        // node needs a 'input_sign' child
-        boolean childHasInputSign = false;
-        for(SyntaxTree s : tree.getChildNodes()) {
-            if(s.getTokenString().equals("INPUT_SIGN")) {
-                childHasInputSign = true;
-                break;
-            }
-        }
+    // Node Matcher
 
-        return isTerm && childHasInputSign;
+    private static boolean isDefine(SyntaxTree tree) {
+        return tree.getToken() == TokenList.DEFINE;
+    }
+
+    private static boolean isAssign(SyntaxTree tree) {
+        return tree.getToken() == TokenList.ASSIGN;
+    }
+
+    private static boolean isCall(SyntaxTree tree) {
+        return tree.getToken() == TokenList.CALL;
     }
 
     private static boolean isIfCondition(SyntaxTree tree) {
-        if (tree.getChildNodes().size() > 0) {
-            boolean isTerm = tree.getTokenString().equals("TERM");
-            boolean isCondition = tree.getChild(0).getCharacter().equals("if");
-
-            return isTerm && isCondition;
-        }
-
-        return false;
+        return tree.getToken() == TokenList.IF;
     }
 
     private static boolean isWhileLoop(SyntaxTree tree) {
-        if (tree.getChildNodes().size() > 0) {
-            boolean isTerm = tree.getTokenString().equals("TERM");
-            boolean isWhile = tree.getChild(0).getCharacter().equals("while");
+        return tree.getToken() == TokenList.WHILE;
+    }
 
-            return isTerm && isWhile;
-        }
+    // Helper Functions
 
-        return false;
+    private static String getFirstComp(SyntaxTree sT) {
+        // From comparision node
+        return sT.getChild(0).getChild(0).getCharacter();
+    }
+
+    private static String getSecondComp(SyntaxTree sT) {
+        return sT.getChild(2).getChild(0).getCharacter();
+    }
+
+    private static String getComparator(SyntaxTree sT) {
+        return sT.getChild(1).getCharacter();
     }
 }

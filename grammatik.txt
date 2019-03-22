@@ -1,6 +1,6 @@
 expression  -> define right_expression | assign right_expression | call right_expression | 'if' comparator right_expression | 'while' comparator right_expression | term right_expression
 
-define      -> 'symbol' 'symbol' | 'symbol' num
+define      -> 'symbol' 'symbol' | 'symbol' term
 
 assign      -> 'symbol' 'symbol' | 'symbol' num
 
