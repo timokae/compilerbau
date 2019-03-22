@@ -33,31 +33,35 @@ class ArithmetikParserApplication implements TokenList{
             if (numScanner.lexicalAnalysis()) {
 
                 // Anlegen des Parsers als Instanz der Klasse ArithmetikParserClass
-                ArithmetikParserClass parser = new ArithmetikParserClass(parseTree, numScanner.tokenStream);
-                for(String key : parser.treeList.keySet()) {
-                    SyntaxTree tree = parser.treeList.get(key);
-                    tree.printSyntaxTree("", true);
-                }
+                ArithmetikParserClass parser = new ArithmetikParserClass(numScanner.tokenStream);
+
                 //Aufruf des Parsers und Test, ob gesamte Eingabe gelesen
-                /*
-                if (parser.expression(parseTree) && parser.inputEmpty()) {
-                    parseTree.printSyntaxTree("", true);    //Ausgabe des Syntaxbaumes und des sematischen Wertes
+                if (parser.parse() && parser.inputEmpty()) {
+                    for (String key : parser.treeList.keySet()) {
+                        SyntaxTree tree = parser.treeList.get(key);
+                        tree.printSyntaxTree("", true);
+                    }
 
 
                     Translator translator = Translator.getInstance();
-                    Translator.traverse(parseTree);
 
-                    ArithmetikParserApplication.printInstructions(translator.getInstructions());
+                    for (String key : parser.treeList.keySet()) {
+                        SyntaxTree tree = parser.treeList.get(key);
+                        Translator.startTraverse(tree);
+                        ArithmetikParserApplication.printInstructions(translator.getInstructions());
+                        Translator.getInstance().instructions.clear();
+                    }
 
+                    /*
                     PDA pda = new PDA(Translator.getInstance().getInstructions());
                     pda.outputList(Translator.getInstance().getInstructions());
                     pda.outputHashmap();
                     pda.run();
+                    */
 
                 } else {
                     System.out.println("Fehler im Ausdruck"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
                 } // expression
-                */
 
             } else {
                 System.out.println("Fehler in lexikalischer Analyse"); //Fehlermeldung, falls lexikalische Analyse fehlgeschlagen
@@ -108,6 +112,9 @@ class ArithmetikParserApplication implements TokenList{
                     break;
                 case "🧐":
                     builder.append("function");
+                    break;
+                case "📣":
+                    builder.append("call");
                     break;
                 default:
                     builder.append(word);

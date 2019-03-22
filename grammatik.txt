@@ -1,0 +1,23 @@
+expression  -> define right_expression | assign right_expression | call right_expression | comparator right_expression | term right_expression
+
+define      -> 'symbol' 'symbol' | 'symbol' num
+
+assign      -> 'symbol' 'symbol' | 'symbol' num
+
+call        -> 'symbol' num
+
+comparator  -> 'if' comparision expression | 'while' comparison expression
+
+comparision -> num comp num
+
+comp        -> '<' | '>' | '=='
+
+symbol      -> 'String'
+
+term        -> operator right_term
+
+operator    -> '(' expression ')' | num
+
+right_term  -> '*' operator rightTerm | '/' operator rightTerm | Epsilon
+
+right_expression -> '+' term right_expression | '-' term right_expression | expression | Epsilon

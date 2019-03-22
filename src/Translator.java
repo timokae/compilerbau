@@ -38,7 +38,7 @@ public class Translator {
     }
 
     private static Translator instance;
-    private ArrayList<Instruction> instructions;
+    public ArrayList<Instruction> instructions;
 
     private Translator() {
         this.instructions = new ArrayList<>();
@@ -120,7 +120,7 @@ public class Translator {
         String comp2 = Translator.getSecondComp(sT);
         String comparator = Translator.getComparator(sT);
 
-        Translator.getInstance().addInstruction("LABEL test");
+        Translator.getInstance().addInstruction("LABEL", "test");
         Translator.getInstance().addInstruction("LOAD", comp1);
         Translator.getInstance().addInstruction("LOAD", comp2);
         Translator.getInstance().addInstruction("COMPARE", comparator);
@@ -144,8 +144,13 @@ public class Translator {
         return sT.getChild(1).getChild(1).getChild(0).getCharacter();
     }
 
-    public static void traverse(SyntaxTree sT) {
+    public static void startTraverse(SyntaxTree tree) {
+        String param = tree.getChild(0).getChild(0).getCharacter();
+        System.out.println("PARAM: " + param);
+        Translator.traverse(tree.getChild(1));
+    }
 
+    public static void traverse(SyntaxTree sT) {
         boolean isTermNode = Translator.isOperatorNode(sT);
 
         if (isIfCondition(sT)) {

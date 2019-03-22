@@ -33,19 +33,21 @@ public class PDA {
         this.program = program;
     }
 
-    private void label(String labelName, int commandLine)
-    {
+    private void label(String labelName, int commandLine) {
         this.labelList.put (labelName, commandLine);
     }
+
     private int goTo (String labelName) {
         return labelList.get(labelName);
     }
+
     private int goTrue(String labelName){
         if (Integer.parseInt(this.pop())==0){
             return labelList.get(labelName);
         }
         else return -1;
     }
+
     private int goFalse(String labelName){
         if (Integer.parseInt(this.pop())!=0){
             return labelList.get(labelName);
@@ -79,7 +81,7 @@ public class PDA {
         return PDA.instance;
     }*/
 
-    public void add()    {this.load(Integer.parseInt(this.pop())+Integer.parseInt(this.pop()));}
+    public void add() { this.load(Integer.parseInt(this.pop())+Integer.parseInt(this.pop())); }
     public void sub()
     {
         this.load(Integer.parseInt(this.pop())-Integer.parseInt(this.pop()));

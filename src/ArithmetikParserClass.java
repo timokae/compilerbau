@@ -52,7 +52,7 @@ import java.util.LinkedList;
 */
 
 public class ArithmetikParserClass implements TokenList{
-    // Konstante f�r Ende der Eingabe
+    // Konstante für Ende der Eingabe
     public final char EOF=(char)255;
     // Zeiger auf das aktuelle Eingabezeichen
     private int pointer;
@@ -60,6 +60,7 @@ public class ArithmetikParserClass implements TokenList{
     private int maxPointer;
     // Eingabe zeichenweise abgelegt
     //private char input[];
+    public LinkedList<Scanner.Token> tokenStream;
     private LinkedList<Scanner.Token> tokens;
     // Syntaxbaum
     private SyntaxTree parseTree;
@@ -70,7 +71,11 @@ public class ArithmetikParserClass implements TokenList{
     //------------Konstruktor der Klasse ArithmetikParserClass-----------------
     //-------------------------------------------------------------------------
 
-    ArithmetikParserClass(SyntaxTree parseTree, LinkedList<Scanner.Token> tokenStream){
+    ArithmetikParserClass(LinkedList<Scanner.Token> tokenStream){
+        this.tokenStream = tokenStream;
+    }
+
+    boolean parse() {
         tokenLists = new HashMap<>();
         treeList = new HashMap<>();
 
@@ -116,7 +121,9 @@ public class ArithmetikParserClass implements TokenList{
 
 
             this.maxPointer = this.tokens.size() - 1;
-            this.init(this.parseTree);
+            if(!this.function(this.parseTree)) {
+                return false;
+            }
             treeList.put(pair.getKey().toString(), this.parseTree);
 
             it.remove(); // avoids a ConcurrentModificationException
@@ -126,13 +133,14 @@ public class ArithmetikParserClass implements TokenList{
         //this.tokens = tokens;
         //this.pointer=0;
         //this.maxPointer=tokens.size() - 1;
+        return true;
     }
 
     //-------------------------------------------------------------------------
     //-------------------Methoden der Grammatik--------------------------------
     //-------------------------------------------------------------------------
 
-    boolean init(SyntaxTree sT) {
+    boolean function(SyntaxTree sT) {
         return (
             parameter(sT.insertSubtree(PARAMETER))
             &&
@@ -145,11 +153,38 @@ public class ArithmetikParserClass implements TokenList{
     // Der Parameter sT ist die Wurzel des bis hier geparsten Syntaxbaumes
     //-------------------------------------------------------------------------
     boolean expression(SyntaxTree sT){
-        return (
-                term(sT.insertSubtree(TERM))
-                        &&
-                        rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
-        );
+        if (match(TokenList.IF, sT)) {
+            return (
+                    condition(sT.insertSubtree(COMPERATOR))
+                            &&
+                            conditionBranch(sT.insertSubtree(RIGHT_TERM))
+            );
+        } else if (match(TokenList.DEFINE, sT)) {
+            return (
+                    symbol(sT.insertSubtree(SYMBOL))
+                    &&
+                    expression(sT.insertSubtree(EXPRESSION))
+            );
+        }
+        else if (match(TokenList.ASSIGN, sT)) {
+            return (
+                    symbol(sT.insertSubtree(SYMBOL))
+                            &&
+                            expression(sT.insertSubtree(EXPRESSION))
+            );
+        } else if (match(TokenList.CALL, sT)) {
+            return (
+                 symbol(sT.insertSubtree(SYMBOL))
+                 &&
+                 num(sT.insertSubtree(NUM))
+            );
+        } else {
+            return (
+                    term(sT.insertSubtree(TERM))
+                            &&
+                            rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+            );
+        }
     }//expression
 
 
@@ -188,32 +223,11 @@ public class ArithmetikParserClass implements TokenList{
 
     boolean term(SyntaxTree sT){
         // term -> operator rightTerm
-        if (match(TokenList.IF, sT)) {
-            return (
-                    condition(sT.insertSubtree(COMPERATOR))
-                            &&
-                            conditionBranch(sT.insertSubtree(RIGHT_TERM))
-            );
-        } else if (match(TokenList.DEFINE, sT)) {
-            return (
-                    symbol(sT.insertSubtree(SYMBOL))
-                            &&
-                            expression(sT.insertSubtree(EXPRESSION))
-            );
-        }
-        else if (match(TokenList.ASSIGN, sT)) {
-            return (
-                    symbol(sT.insertSubtree(SYMBOL))
-                            &&
-                            expression(sT.insertSubtree(EXPRESSION))
-            );
-        } else {
-            return (
-                    operator(sT.insertSubtree(OPERATOR))
-                            &&
-                            rightTerm(sT.insertSubtree(RIGHT_TERM))
-            );
-        }
+        return (
+            operator(sT.insertSubtree(OPERATOR))
+            &&
+            rightTerm(sT.insertSubtree(RIGHT_TERM))
+        );
     }//term
 
     //-------------------------------------------------------------------------
@@ -288,9 +302,9 @@ public class ArithmetikParserClass implements TokenList{
 
     boolean condition(SyntaxTree sT) {
         return (
-                num(sT.insertSubtree(NUM))
-                        &&
-                        rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
+            num(sT.insertSubtree(NUM))
+            &&
+            rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
         );
     }
 

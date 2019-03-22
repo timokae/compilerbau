@@ -75,6 +75,7 @@ class NumScanner extends Scanner{
 			case 29: return "WHILE";
 			case 30: return "DEFINE";
 			case 31: return "ASSIGN";
+            case 33: return "CALL";
 		default: return "";
 		}
 	}
