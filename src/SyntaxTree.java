@@ -24,13 +24,7 @@ class SyntaxTree implements TokenList{
 	// Eingabezeichen repraesentiert, handelt, d.h. einen Knoten mit dem Token
 	// DIGIT oder MATH_SIGN.
 	private String character;
-	
-	
-	// value enthaelt die semantsiche Funktion des Teilbaums
-	// mit Wurzelknoten this
-	public Semantic value;
-	
-		
+
 	//-------------------------------------------------------------------------
 	// Konstruktor des Syntaxbaumes 
 	//-------------------------------------------------------------------------
@@ -40,7 +34,6 @@ class SyntaxTree implements TokenList{
 		this.childNodes= new LinkedList<SyntaxTree>();
 		character="";
 		setToken(t);
-		setSemantikFunction(t);
 	}
 	//-------------------------------------------------------------------------
 	// get und set Methoden des Syntaxbaumes
@@ -90,18 +83,6 @@ class SyntaxTree implements TokenList{
         for(int i = 0; i < this.childNodes.size(); i++) {
             this.childNodes.get(i).printSyntaxTree(indent, i == this.childNodes.size() - 1);
         }
-
-        /*for(int i=0;i<t;i++)
-		  System.out.print("  ");
-		System.out.print(this.getTokenString());  		
-		if(this.character!=0)
-			System.out.println(":"+this.getCharacter());
-		else
-			System.out.println();
-		for(int i=0;i<this.childNodes.size();i++){
-			this.childNodes.get(i).printSyntaxTree(t+1);
-		}
-		*/
 	}
 
 
@@ -139,31 +120,6 @@ class SyntaxTree implements TokenList{
 		}
 	}
 
-	// Bestimmt und speichert die semantsiche Funktion des Kontens in
-	// Abhaengigkeit vom Knotentyp
-	void setSemantikFunction(byte b){
-		switch(b){/*
-			case 1: value=new Expression();
-					break;
-			case 2: value=new RightExpression();
-					break;
-			case 3: value=new Term();
-					break;
-			case 4: value=new RightTerm();
-					break;
-			case 5: value=new Num();
-					break;
-			case 6: value=new Operator();
-					break;
-			case 7: value=new Digit();
-					break; */
-		default: value=new Semantic();
-				 break;
-		}
-	}
-	
-	
-	
 	// Legt einen neuen Teilbaum als Kind des aktuellen Knotens an und gibt die
 	// Referenz auf seine Wurzel zurueck
 	SyntaxTree insertSubtree(byte b){

@@ -21,19 +21,19 @@ class ArithmetikParserApplication implements TokenList{
         // Anlegen des Wurzelknotens fuer den Syntaxbaum. Dem Konstruktor
         // wid als Token das Startsymbol der Grammatik uebergeben
 
-        convertSourceCode("testdatei_arithmetik.txt", "tmp.txt");
+        convertSourceCode("input.txt", "tmp.txt");
 
         SyntaxTree parseTree = new SyntaxTree(EXPRESSION);
 
-        NumScanner numScanner = new NumScanner();
+        SourceScanner sourceScanner = new SourceScanner();
         //parser.readInput("tmp.txt");
 
-        if (numScanner.readInput("tmp.txt")) {
+        if (sourceScanner.readInput("tmp.txt")) {
             // lexikalische Analyse durchfuehren
-            if (numScanner.lexicalAnalysis()) {
+            if (sourceScanner.lexicalAnalysis()) {
 
                 // Anlegen des Parsers als Instanz der Klasse ArithmetikParserClass
-                ArithmetikParserClass parser = new ArithmetikParserClass(numScanner.tokenStream);
+                ArithmetikParserClass parser = new ArithmetikParserClass(sourceScanner.tokenStream);
 
                 //Aufruf des Parsers und Test, ob gesamte Eingabe gelesen
                 if (parser.parse() && parser.inputEmpty()) {

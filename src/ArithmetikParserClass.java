@@ -1,55 +1,6 @@
-import java.io.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-
-/*
-    ArithmetikParserClass.java
-
-    Praktikum Algorithmen und Datenstrukturen
-    Grundlage zum Versuch 2
-
-    Diese Java Klasse implementiert einen
-    einfachen Parser zum Erkennen arithmetischer
-    Ausdr�cke der folgenden Grammatik:
-
-    expression -> term rightExpression
-    rightExpression -> '+' term rightExpression
-    rightExpression -> '-' term rightExpression
-    rightExpression -> Epsilon
-    term -> operator rightTerm
-    term -> condition rightTerm
-    rightTerm -> '*' operator rightTerm
-    rightTerm -> '/' operator rightTerm
-    rightTerm -> Epsilon
-    operator -> '(' expression ')' | num
-    num -> digit num | digit
-    digit -> '1' | '2' | '3' | '4' | '5' |'6' | '7' | '8' | '9' | '0'
-
-    Epsilon steht hier für das "leere Wort"
-
-    Der Parser ist nach dem Prinzip des rekursiven Abstiegs programmiert,
-    d.h. jedes nicht terminale Symbol der Grammatik wird durch eine
-    Methode in Java repräsentiert, die die jeweils anderen nicht terminalen
-    Symbole auf der rechten Seite der Grammatik Regeln ggf. auch rekursiv
-    aufruft.
-
-    Der zu parsende Ausdruck wird aus einer Datei gelesen und in einem
-    Array of Char abgespeichert. Pointer zeigt beim Parsen auf den aktuellen
-    Eingabewert.
-
-    Ist der zu parsende Ausdruck syntaktisch nicht korrekt, so werden
-    �ber die Methode syntaxError() entsprechende Fehlermeldungen ausgegeben.
-
-    Zus�tzlich werden den Methoden der Klasse neben der Rekursionstiefe auch
-    eine Referenz auf eine Instanz der Klasse SyntaxTree �bergeben.
-
-    �ber die Instanzen der Klasse SyntaxTree wird beim rekursiven Abstieg
-    eine konkreter Syntaxbaum des geparsten Ausdrucks aufgebaut.
-
-*/
 
 public class ArithmetikParserClass implements TokenList{
     // Konstante für Ende der Eingabe
@@ -306,7 +257,7 @@ public class ArithmetikParserClass implements TokenList{
                 rightTerm(sT.insertSubtree(RIGHT_TERM))
             );
         } else {
-            SyntaxTree epsilonTree = sT.insertSubtree(EPSILON);
+            sT.insertSubtree(EPSILON);
             return true;
         }
     }
@@ -365,12 +316,6 @@ public class ArithmetikParserClass implements TokenList{
     //-------------------Hilfsmethoden-----------------------------------------
     //-------------------------------------------------------------------------
 
-    //-------------------------------------------------------------------------
-    // Methode, die testet, ob das aktuele Eingabezeichen unter den Zeichen
-    // ist, die als Parameter (matchSet) �bergeben wurden.
-    // Ist das der Fall, so gibt match() true zur�ck und setzt den Eingabe-
-    // zeiger auf das n�chste Zeichen, sonst wird false zur�ckgegeben.
-    //-------------------------------------------------------------------------
     boolean match(byte token, SyntaxTree sT){
         SyntaxTree node;
 
@@ -379,7 +324,7 @@ public class ArithmetikParserClass implements TokenList{
             node=sT.insertSubtree(INPUT_SIGN);
             node.setCharacter(tokens.get(pointer).lexem);
 
-            pointer++;	//Eingabepointer auf das n�chste Zeichen setzen
+            pointer++;	//Eingabepointer auf das nächste Zeichen setzen
             return true;
         }
 
@@ -399,26 +344,6 @@ public class ArithmetikParserClass implements TokenList{
         return tokens.get(pointer).token==token;
     }
 
-    //-------------------------------------------------------------------------
-    //Methode, die testet, ob das auf das aktuelle Zeichen folgende Zeichen
-    //unter den Zeichen ist, die als Parameter (aheadSet) �bergeben wurden.
-    //Der Eingabepointer wird nicht ver�ndert!
-    //-------------------------------------------------------------------------
-    /*
-    boolean lookAhead(char [] aheadSet){
-        for (int i=0;i<aheadSet.length;i++) {
-            if (input[pointer+1]==aheadSet[i]) {
-                return true;
-            }
-        }
-        return false;
-    }//lookAhead
-    */
-
-    //-------------------------------------------------------------------------
-    // Methode, die testet, ob das Ende der Eingabe erreicht ist
-    // (pointer == maxPointer)
-    //-------------------------------------------------------------------------
     boolean inputEmpty(){
         if (pointer==maxPointer){
             ausgabe("Eingabe leer! bzw zu am Ende",0);

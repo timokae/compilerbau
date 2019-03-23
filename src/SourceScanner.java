@@ -8,13 +8,13 @@
 	NUM := {'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'0'}
 
 */
-class NumScanner extends Scanner{
+class SourceScanner extends Scanner{
 	
 	//-------------------------------------------------------------------------
 	// Konstruktor (Legt die Zustaende und Transitionstabelle des DEA an)
 	//-------------------------------------------------------------------------
 	
-	NumScanner(){
+	SourceScanner(){
 		// Transitionstabelle zum regulaeren Ausdruck
 		//	    											+
 		// NUM := {'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'0'}

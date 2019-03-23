@@ -1,7 +1,7 @@
 class TestScanner{
 	static public void main(String args[]){
-		NumScanner scanner;
-		scanner = new NumScanner();
+		SourceScanner scanner;
+		scanner = new SourceScanner();
 		if (scanner.readInput("testdatei_arithmetik.txt")){
 			scanner.printInputStream();
 			if(scanner.lexicalAnalysis())
