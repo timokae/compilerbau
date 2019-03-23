@@ -167,6 +167,8 @@ public class ArithmetikParserClass implements TokenList{
         if (match(TokenList.SYMBOL, sT)) {
             if (match(TokenList.NUM, sT)) {
                 return true;
+            } else if (match(TokenList.SYMBOL, sT)) {
+                return true;
             }
         }
 
@@ -230,7 +232,7 @@ public class ArithmetikParserClass implements TokenList{
                 &&
                 rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
             );
-        } else if (match(TokenList.COMPARISION, sT)) {
+        } else if (match(TokenList.COMPARISION, sT)) { // Keine Ahnung obs drin sein muss
             return (
                 term(sT.insertSubtree(TERM))
                 &&
@@ -277,9 +279,12 @@ public class ArithmetikParserClass implements TokenList{
                 syntaxError("Fehler in geschachtelter Expression");
                 return false;
             }
-        } else if (num(sT.insertSubtree(NUM))) {
-            return true;
-        } else {
+        } else if (inPlaceCompareToken(NUM, sT)) {
+            return num(sT.insertSubtree(NUM));
+        } else if (inPlaceCompareToken(SYMBOL, sT)) {
+            return symbol(sT.insertSubtree(SYMBOL));
+        }
+        else {
             syntaxError("Ziffer oder Klammer auf erwartet");
             return false;
         }
@@ -306,7 +311,10 @@ public class ArithmetikParserClass implements TokenList{
     boolean parameter(SyntaxTree sT) {
         if (match(TokenList.NUM, sT)) {
             return true;
-        } else {
+        } else if (match(TokenList.SYMBOL, sT)) {
+            return true;
+        }
+        else {
             syntaxError("Ziffer erwartet");
             return false;
         }

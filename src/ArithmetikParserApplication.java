@@ -15,6 +15,7 @@
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 class ArithmetikParserApplication implements TokenList{
     public static void main(String args[]){
@@ -42,25 +43,37 @@ class ArithmetikParserApplication implements TokenList{
                         tree.printSyntaxTree("", true);
                     }
 
+                    // Array List mit den Instructions aller Funktionen
+                    ArrayList<Translator.Instruction> allInstructions = new ArrayList<>();
 
-                    Translator translator = Translator.getInstance();
-
-                    for (String key : parser.treeList.keySet()) {
-                        SyntaxTree tree = parser.treeList.get(key);
-                        Translator.startTraverse(tree);
-                        ArithmetikParserApplication.printInstructions(translator.getInstructions());
-                        PDA pda = new PDA(Translator.getInstance().getInstructions());
-                        pda.printSymbolTable();
-                        Translator.getInstance().instructions.clear();
+                    SyntaxTree mainTree = parser.treeList.get("main");
+                    if (mainTree == null) {
+                        System.out.println("Keine Main Methode gefunden!");
+                        return;
                     }
 
-                    /*
+                    Translator.startTraverse(mainTree);
+                    allInstructions.addAll(Translator.getInstance().getInstructions());
+                    Translator.getInstance().instructions.clear();
+
+                    for (String key : parser.treeList.keySet()) {
+                        if (!key.equals("main")) {
+                            SyntaxTree tree = parser.treeList.get(key);
+                            Translator.startTraverse(tree);
+                            allInstructions.addAll(Translator.getInstance().getInstructions());
+                            Translator.getInstance().instructions.clear();
+                        }
+                    }
+
+                    ArithmetikParserApplication.printInstructions(allInstructions);
+                    //PDA pda = new PDA(Translator.getInstance().getInstructions());
+                    //pda.printSymbolTable();
+
+
                     PDA pda = new PDA(Translator.getInstance().getInstructions());
-                    pda.outputList(Translator.getInstance().getInstructions());
+                    pda.outputList(allInstructions);
                     pda.outputHashmap();
                     pda.run();
-                    */
-
                 } else {
                     System.out.println("Fehler im Ausdruck"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
                 } // expression

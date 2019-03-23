@@ -39,6 +39,7 @@ public class Translator {
 
     private static Translator instance;
     public ArrayList<Instruction> instructions;
+    private int instructionIndex = 0;
 
     private Translator() {
         this.instructions = new ArrayList<>();
@@ -73,13 +74,9 @@ public class Translator {
     //-------------------Add To Stack Functions--------------------------------
     //-------------------------------------------------------------------------
 
-    public static void addNumberToStack(SyntaxTree sT) {
-        // Read all numbers from children and add into one number
-        //int[] numbers = Translator.traverserNumber(sT, new int[0]);
-        int number = Integer.valueOf(sT.getCharacter());
-
-        // Add number to stack as instruction
-        Translator.getInstance().addInstruction("LOAD", String.valueOf(number));
+    public static void addValueToStack(SyntaxTree sT) {
+        String value = sT.getCharacter();
+        Translator.getInstance().addInstruction("LOAD", value);
     }
 
     public static void addOperatorToStack(SyntaxTree sT) {
@@ -128,13 +125,15 @@ public class Translator {
         String comp2 = Translator.getSecondComp(sT);
         String comparator = Translator.getComparator(sT);
 
-        Translator.getInstance().addInstruction("LABEL", "test");
+        String index = String.valueOf(Translator.getInstance().getInstructionIndex());
+        // RENAME test -> while1
+        Translator.getInstance().addInstruction("LABEL", "while" + index);
         Translator.getInstance().addInstruction("LOAD", comp1);
         Translator.getInstance().addInstruction("LOAD", comp2);
         Translator.getInstance().addInstruction("COMPARE", comparator);
         Translator.getInstance().addInstruction("GOTRUE", "out");
-        Translator.traverse(sT.getChild(2));
-        Translator.getInstance().addInstruction("GOTO test");
+        Translator.traverse(sT.getChild(1));
+        Translator.getInstance().addInstruction("GOTO while" + index);
         Translator.getInstance().addInstruction("LABEL", "out");
         Translator.getInstance().addInstruction("HALT");
 
@@ -154,16 +153,25 @@ public class Translator {
     public static void addCallToStack(SyntaxTree tree) {
         String functionName = tree.getChild(0).getCharacter();
         String parameter = tree.getChild(1).getCharacter();
+        String index = String.valueOf(Translator.getInstance().getInstructionIndex());
 
-        Translator.getInstance().addInstruction("ADDSYMBOL", parameter, "back1", functionName + "1");
-        Translator.getInstance().addInstruction("LOADSYMBOLLABEL", functionName + "1");
-        Translator.getInstance().addInstruction("GOTO", functionName);
-        Translator.getInstance().addInstruction("LABEL", "back1");
+        if (functionName.equals("print")) {
+            Translator.getInstance().addInstruction("PRINT", parameter);
+        } else {
+            Translator.getInstance().addInstruction("ADDSYMBOL", parameter, "back" + index, functionName + index);
+            Translator.getInstance().addInstruction("LOADSYMBOLLABEL", functionName + index);
+            Translator.getInstance().addInstruction("GOTO", functionName);
+            Translator.getInstance().addInstruction("LABEL", "back" + index);
+        }
+    }
+
+    public static void addParameterToStack(SyntaxTree tree) {
+        String param = tree.getChild(0).getChild(0).getCharacter();
+        Translator.getInstance().addInstruction("ADDPARAM", param);
     }
 
     public static void startTraverse(SyntaxTree tree) {
-        String param = tree.getChild(0).getChild(0).getCharacter();
-        System.out.println("PARAM: " + param);
+        Translator.addParameterToStack(tree);
         Translator.traverse(tree.getChild(1));
     }
 
@@ -189,31 +197,12 @@ public class Translator {
         else if (isWhileLoop(sT)) {
             Translator.addWhileToStack(sT);
         }
-        /*else if (sT.getTokenString().equals("NUMBER")) { // Numbers > 9 consist of several nodes
-            Translator.addNumberToStack(sT);
-        }
-        else if (isTermNode) { // Node has an expression/term and has an operator
-            Translator.traverse(sT.getChildNodes().get(1)); // first traverse left side
-            Translator.traverse(sT.getChildNodes().get(0)); // then push operator onto stack
-
-            // at the end traverse right right
-            for(int i = 2; i < sT.getChildNodes().size(); i++) {
-                Translator.traverse(sT.getChildNodes().get(i));
-            }
-        }
-        */
         // No specific case found
         else {
             for(SyntaxTree s : sT.getChildNodes()) {
                 Translator.traverse(s);
             }
         }
-
-        // INPUT_SIGN reached that is not a number
-        /*if (sT.getTokenString().equals("INPUT_SIGN")) {
-            addOperatorToStack(sT);
-        }
-        */
     }
 
     public static void traverseTerm(SyntaxTree tree) {
@@ -228,11 +217,11 @@ public class Translator {
             traverseTerm(tree.getChild(1));
             traverseRightTerm(tree.getChild(2));
         } else if (tree.getChildNodes().size() == 2) {
-            addNumberToStack(tree.getChild(0).getChild(0).getChild(0));
+            addValueToStack(tree.getChild(0).getChild(0).getChild(0));
             traverseRightTerm(tree.getChild(1));
         }
         else {
-            addNumberToStack(tree.getChild(0).getChild(0));
+            addValueToStack(tree.getChild(0).getChild(0));
         }
     }
 
@@ -295,14 +284,25 @@ public class Translator {
 
     private static String getFirstComp(SyntaxTree sT) {
         // From comparision node
-        return sT.getChild(0).getChild(0).getCharacter();
+        return sT.getChild(0).getChild(0).getChild(0).getCharacter();
     }
 
     private static String getSecondComp(SyntaxTree sT) {
-        return sT.getChild(2).getChild(0).getCharacter();
+        return sT.getChild(0).getChild(2).getChild(0).getCharacter();
     }
 
     private static String getComparator(SyntaxTree sT) {
         return sT.getChild(1).getCharacter();
+    }
+
+    private void incrementInstructionIndex() {
+        this.instructionIndex++;
+    }
+
+
+    private int getInstructionIndex() {
+        int index = this.instructionIndex;
+        this.incrementInstructionIndex();
+        return index;
     }
 }
