@@ -110,7 +110,7 @@ abstract class Scanner implements TokenList{
 		//System.out.println(Arrays.toString(matchSet));
 		for (int i=0;i<matchSet.length;i++)
 			if (inputStream.get(pointer).character==matchSet[i]){
-				System.out.println("match:"+inputStream.get(pointer).character);
+				//System.out.println("match:"+inputStream.get(pointer).character);
 
 				char currentChar = inputStream.get(pointer).character;
 				if (!(currentChar == '"' || currentChar == ' '))
@@ -128,10 +128,10 @@ abstract class Scanner implements TokenList{
 	//-------------------------------------------------------------------------
 	void lexicalError(String s){
 		char z;
-		System.out.println("lexikalischer Fehler in Zeile "+
-				inputStream.get(pointer).line+". Zeichen: "+
+		System.out.println("lexikalischer 💣 in Zeile "+
+				inputStream.get(pointer).line+".\nZeichen: "+
 				inputStream.get(pointer).character);
-		System.out.println((byte)inputStream.get(pointer).character);	
+		//System.out.println((byte)inputStream.get(pointer).character);
 	}//lexicalError
 
 	//-------------------------------------------------------------------------
@@ -196,7 +196,7 @@ abstract class Scanner implements TokenList{
 			System.out.println("Fehler beim Dateizugriff: "+name);
 			return false;
 		}
-		System.out.println("Inputstream Size: " + inputStream.size());
+		//System.out.println("Inputstream Size: " + inputStream.size());
 
 		return true;	
 	}//readInput
@@ -226,14 +226,6 @@ abstract class Scanner implements TokenList{
 				tokenStream.addLast(new Token(token, inputStream.get(pointer - 1).line, lexem));
 			}
 		}//while
-		// Bei erfolgreichem Scannen, Token Strom mit EOF abschlie�en
-
-        for(Token t : tokenStream) {
-            System.out.println(this.getTokenString(t.token));
-            System.out.println(t.lexem);
-            System.out.println("Line: " + t.line);
-            System.out.println("------");
-        }
 
 		tokenStream.addLast(new Token((byte)EOF,inputStream.get(pointer-1).line,"EOF"));
 		return true;
@@ -293,7 +285,7 @@ abstract class Scanner implements TokenList{
 				for(int j=0;j<dea.transitions[actualState].length;j++) {
                     if (match(dea.transitions[actualState][j])) {
 						// Eingabewert passt zu Wertemenge des Zustands j
-						System.out.println(actualState + "->" + j);
+						//System.out.println(actualState + "->" + j);
 
 						if ((dea.states[j] == EndState) && bufferState!=0) {
 						actualState = bufferState;
@@ -316,7 +308,7 @@ abstract class Scanner implements TokenList{
                 return dea.states[actualState];
             } else {
 				lexicalError("");
-				System.out.println(pointer);
+				//System.out.println(pointer);
 				return NO_TYPE;
 			}
 		}//getNextToken

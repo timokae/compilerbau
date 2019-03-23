@@ -40,7 +40,7 @@ class ArithmetikParserApplication implements TokenList{
                 if (parser.parse() && parser.inputEmpty()) {
                     for (String key : parser.treeList.keySet()) {
                         SyntaxTree tree = parser.treeList.get(key);
-                        tree.printSyntaxTree("", true);
+                        //tree.printSyntaxTree("", true);
                     }
 
                     // Array List mit den Instructions aller Funktionen
@@ -48,7 +48,7 @@ class ArithmetikParserApplication implements TokenList{
 
                     SyntaxTree mainTree = parser.treeList.get("main");
                     if (mainTree == null) {
-                        System.out.println("Keine Main Methode gefunden!");
+                        System.out.println("Keine Main 📣 gefunden!");
                         return;
                     }
 
@@ -71,15 +71,15 @@ class ArithmetikParserApplication implements TokenList{
 
 
                     PDA pda = new PDA(Translator.getInstance().getInstructions());
-                    pda.outputList(allInstructions);
-                    pda.outputHashmap();
+                    //pda.outputList(allInstructions);
+                    //pda.outputHashmap();
                     pda.run();
                 } else {
-                    System.out.println("Fehler im Ausdruck"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
+                    System.out.println("💣 im 💬"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
                 } // expression
 
             } else {
-                System.out.println("Fehler in lexikalischer Analyse"); //Fehlermeldung, falls lexikalische Analyse fehlgeschlagen
+                System.out.println("💣 in 📖🔎"); //Fehlermeldung, falls lexikalische Analyse fehlgeschlagen
             } // lexicalAnalysis
         } // readInput
     }//main
@@ -124,9 +124,6 @@ class ArithmetikParserApplication implements TokenList{
                 case "🔁":
                     builder.append("while");
                     break;
-                case "🔃":
-                    builder.append("for");
-                    break;
                 case "👉":
                     builder.append("do");
                     break;
@@ -136,14 +133,17 @@ class ArithmetikParserApplication implements TokenList{
                 case "✍️":
                     builder.append("define");
                     break;
-                case "👏":
-                    builder.append("~");
+                case "📌":
+                    builder.append("assign");
                     break;
                 case "🧐":
                     builder.append("function");
                     break;
                 case "📣":
                     builder.append("call");
+                    break;
+                case "🖨":
+                    builder.append("print");
                     break;
                 default:
                     builder.append(word);
@@ -165,7 +165,7 @@ class ArithmetikParserApplication implements TokenList{
 
             while (line != null) {
                 String s = new String(line.getBytes("UTF-8"), "UTF-8");
-                System.out.println(replaceEmojis(s));
+                //System.out.println(replaceEmojis(s));
 
                 writer.write(replaceEmojis(s));
                 writer.write("\n");

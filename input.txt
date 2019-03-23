@@ -1,12 +1,12 @@
-function main 1
-    define a 1
+🧐 main 1
+    ✍️ a 1
 
-    while a < 4 do
-        assign a (a+1)
-        call print a
-    end
-end
+    🔁 a < 4 👉
+        📌 a (a+1)
+        📣 🖨 a
+    😵
+😵
 
-function testfunction 2
-    define b 2
-end
+🧐 testfunction 2
+    ✍️ b 2
+😵

@@ -51,12 +51,15 @@ public class ArithmetikParserClass implements TokenList{
         Iterator it = tokenLists.entrySet().iterator();
         while (it.hasNext()) {
             HashMap.Entry pair = (HashMap.Entry)it.next();
+
+            /*
             System.out.println(pair.getKey());
             for(Scanner.Token t : tokenLists.get(pair.getKey())) {
                 System.out.println(t.token + ": " + t.lexem);
             }
 
             System.out.println("--------");
+            */
 
             this.tokens = tokenLists.get(pair.getKey());
             this.pointer = 0;
@@ -271,7 +274,7 @@ public class ArithmetikParserClass implements TokenList{
                 if(match(TokenList.CLOSE_PAR,sT)) {
                     return true;
                 } else {
-                    syntaxError("Geschlossene Klammer erwartet");
+                    syntaxError("Geschlossene 📎 erwartet");
                     return false;
                 }
 
@@ -285,7 +288,7 @@ public class ArithmetikParserClass implements TokenList{
             return symbol(sT.insertSubtree(SYMBOL));
         }
         else {
-            syntaxError("Ziffer oder Klammer auf erwartet");
+            syntaxError("🔢 oder 🖇 auf erwartet");
             return false;
         }
     }
@@ -354,7 +357,7 @@ public class ArithmetikParserClass implements TokenList{
 
     boolean inputEmpty(){
         if (pointer==maxPointer){
-            ausgabe("Eingabe leer! bzw zu am Ende",0);
+            ausgabe("Eingabe 📭! bzw zu am Ende",0);
             return true;
         }else{
             syntaxError("Eingabe bei Ende des Parserdurchlaufs nicht leer");
@@ -381,9 +384,10 @@ public class ArithmetikParserClass implements TokenList{
     void syntaxError(String s){
         char z;
         if (pointer >= tokens.size()) {
-            System.out.println("Syntax Fehler beim " + (pointer + 1) + ". Zeichen: EOF");
+            //System.out.println("Syntax Fehler beim " + (pointer + 1) + ". Zeichen: EOF");
+            System.out.println("Syntax 💥 beim " + (pointer + 1) + ". Zeichen: 🔚");
         } else {
-            System.out.println("Syntax Fehler beim " + (pointer + 1) + ". Zeichen: " + tokens.get(pointer).token);
+            System.out.println("Syntax 💥 beim " + (pointer + 1) + ". Zeichen: " + tokens.get(pointer).token);
             System.out.println(tokens.get(pointer).lexem);
         }
         System.out.println(s);
