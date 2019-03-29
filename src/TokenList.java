@@ -44,7 +44,8 @@ interface TokenList {
 				DEFINE=30,
                 ASSIGN=31,
                 PARAMETER=32,
-                CALL=33;
+                CALL=33,
+				RETURN=34;
 				
 	// Konstante, die angibt, dass die Semantische Funktion eines Knotens 
 	// undefiniert ist

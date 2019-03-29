@@ -149,6 +149,13 @@ public class PDA {
         this.addSymbol(instruction.getNamePayload(),this.pop(),instruction.getLabelPayload());
     }
 
+    public void changeValue(String name, String value){
+        symbolElement  help = symbolTable.get(getSymbolIndex((name)));
+        symbolTable.remove((getSymbolIndex(name)));
+        help.value = value;
+        this.addSymbol(help.name,help.value,help.label);
+    }
+
 
     //removes and prints an element from the stack.
     public void out(){
@@ -207,6 +214,10 @@ public class PDA {
                 String payload = Instruction.getPayload();
                 this.load(substitude(payload));
                 break;
+            case "LOAD_FUNCTION_NAME":
+                String functionName = Instruction.getPayload();
+                this.load(functionName);
+                break;
             case "LABEL":
                 this.label(Instruction.getPayload(),currentPosition);
                 break;
@@ -250,12 +261,16 @@ public class PDA {
                 this.load(symbolTable.get(getSymbolIndex(Instruction.getPayload())).label);
                 break;
             case"CHANGEVALUE":
-                //change existing values from a symboltable
                 this.changeValue(Instruction);
+                break;
+            case"CHANGESTACK":
+                this.changeValue(this.pop(),Instruction.getPayload());
                 break;
             case"PRINT":
                 this.print(Instruction.getPayload());
                 break;
+            default:
+                System.out.println(command);
         }
         if (ret == -1){
             return currentPosition+1;

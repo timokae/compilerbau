@@ -42,6 +42,7 @@ public class Translator {
     private static Translator instance;
     public ArrayList<Instruction> instructions;
     private int instructionIndex = 0;
+    private String returnValue;
 
     private Translator() {
         this.instructions = new ArrayList<>();
@@ -171,16 +172,20 @@ public class Translator {
     public static void addCallToStack(SyntaxTree tree) {
         String functionName = tree.getChild(0).getCharacter();
         String parameter = tree.getChild(1).getCharacter();
+
         String index = String.valueOf(Translator.getInstance().getInstructionIndex());
 
         if (functionName.equals("print")) {
             Translator.getInstance().addInstruction("PRINT", parameter);
         } else {
+            String returnVar = tree.getChild(2).getCharacter();
+
             Translator.getInstance().addInstruction("LOAD", parameter);
             Translator.getInstance().addInstruction("ADDSYMBOL", parameter, "back" + index, functionName + index);
             Translator.getInstance().addInstruction("LOAD", parameter);
             Translator.getInstance().addInstruction("CHANGEVALUE", "", "null", "s");
             Translator.getInstance().addInstruction("LOADSYMBOLLABEL", functionName + index);
+            Translator.getInstance().addInstruction("LOAD_FUNCTION_NAME", functionName + index);
             Translator.getInstance().addInstruction("GOTO", functionName);
             Translator.getInstance().addInstruction("LABEL", "back" + index);
         }
@@ -189,6 +194,11 @@ public class Translator {
     public static void addParameterToStack(SyntaxTree tree) {
         String param = tree.getChild(0).getChild(0).getCharacter();
         Translator.getInstance().addInstruction("ADDPARAM", param);
+    }
+
+    public static void addReturnToStack(SyntaxTree tree) {
+        String value = tree.getChild(0).getChild(0).getCharacter();
+        Translator.getInstance().returnValue = value;
     }
 
     public static void startTraverse(SyntaxTree tree, String functionName) {
@@ -208,6 +218,7 @@ public class Translator {
 
         if (!functionName.equals("main")) {
             Translator.getInstance().addInstruction("POP");
+            Translator.getInstance().addInstruction("CHANGESTACK", Translator.getInstance().returnValue);
             Translator.getInstance().addInstruction("GOTOSTACK");
         }
         Translator.getInstance().addInstruction("HALT");
@@ -234,6 +245,8 @@ public class Translator {
         }
         else if (isWhileLoop(sT)) {
             Translator.addWhileToStack(sT);
+        } else if (isReturn(sT)) {
+            Translator.addReturnToStack(sT);
         }
         // No specific case found
         else {
@@ -314,6 +327,10 @@ public class Translator {
 
     private static boolean isTerm(SyntaxTree tree) {
         return tree.getToken() == TokenList.TERM;
+    }
+
+    private static boolean isReturn(SyntaxTree tree) {
+        return tree.getToken() == TokenList.RETURN;
     }
 
     //-------------------------------------------------------------------------

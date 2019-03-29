@@ -116,6 +116,7 @@ class SyntaxTree implements TokenList{
 			case 26:	return "IF";
 			case 29:	return "WHILE";
             case 33:    return "CALL";
+			case 34:	return "RETURN";
 			default:    return "";
 		}
 	}

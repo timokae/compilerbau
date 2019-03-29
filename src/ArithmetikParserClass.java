@@ -135,6 +135,8 @@ public class ArithmetikParserClass implements TokenList{
                 &&
                 rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))
             );
+        } else if (compareToken(RETURN, sT)) {
+            return returnStatement(sT.insertSubtree(RETURN));
         }
         else {
             sT.insertSubtree(EPSILON);
@@ -175,9 +177,13 @@ public class ArithmetikParserClass implements TokenList{
     boolean call(SyntaxTree sT) {
         if (match(TokenList.SYMBOL, sT)) {
             if (match(TokenList.NUM, sT)) {
-                return true;
+                if (match(TokenList.SYMBOL, sT)) {
+                    return true;
+                }
             } else if (match(TokenList.SYMBOL, sT)) {
-                return true;
+                if (match(TokenList.SYMBOL, sT)) {
+                    return true;
+                }
             }
         }
 
@@ -334,6 +340,16 @@ public class ArithmetikParserClass implements TokenList{
         }
         else {
             syntaxError("Ziffer erwartet");
+            return false;
+        }
+    }
+
+    boolean returnStatement(SyntaxTree sT) {
+        if (inPlaceCompareToken(NUM, sT)) {
+            return num(sT.insertSubtree(NUM));
+        } else if (inPlaceCompareToken(SYMBOL, sT)) {
+            return symbol(sT.insertSubtree(SYMBOL));
+        } else {
             return false;
         }
     }

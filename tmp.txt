@@ -1,12 +1,9 @@
 function main 1
-    define a 0
-    call output a
+    define x 0
+    call output 3 x
+    call print x x
 end
 
 function output 2
-    call print a
-    assign a (a+1)
-    if a < 4 do
-        call output a
-    end
+    return 1
 end

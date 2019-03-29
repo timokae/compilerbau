@@ -74,6 +74,7 @@ class ArithmetikParserApplication implements TokenList{
                     //pda.outputList(allInstructions);
                     //pda.outputHashmap();
                     pda.run();
+                    //pda.printSymbolTable();
                 } else {
                     System.out.println("💣 im 💬"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
                 } // expression

@@ -1,14 +1,16 @@
-expression       -> define right_expression | assign right_expression | call right_expression | if right_expression | while right_expression | ε
+expression       -> define right_expression | assign right_expression | call right_expression | if right_expression | while right_expression | return | ε
 
 define           -> symbol symbol | symbol term | symbol string
 
 assign           -> symbol symbol | symbol term | symbol string
 
+return           -> num | symbol
+
 function         -> parameter expression
 
 parameter        -> num | Symbol
 
-call             -> symbol num | symbol symbol
+call             -> symbol num | symbol symbol | symbol symbol symbol
 
 comparator       -> comparision expression
 
