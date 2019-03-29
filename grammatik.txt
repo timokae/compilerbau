@@ -1,8 +1,8 @@
 expression       -> define right_expression | assign right_expression | call right_expression | if right_expression | while right_expression | ε
 
-define           -> symbol symbol | symbol term
+define           -> symbol symbol | symbol term | symbol string
 
-assign           -> symbol symbol | symbol term
+assign           -> symbol symbol | symbol term | symbol string
 
 function         -> parameter expression
 
@@ -19,6 +19,8 @@ conditionbrunch  -> 'Do' expression right_expression 'end'
 comp             -> '<' | '>' | '=='| '>=' | '<='
 
 symbol           -> 'input:sign'
+
+string           -> 'input:sign'
 
 term             -> operator right_term
 

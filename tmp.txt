@@ -1,12 +1,12 @@
 function main 1
-    define a 1
-
-    while a < 4 do
-        assign a (a+1)
-        call print a
-    end
+    define a 0
+    call output a
 end
 
-function testfunction 2
-    define b 2
+function output 2
+    call print a
+    assign a (a+1)
+    if a < 4 do
+        call output a
+    end
 end

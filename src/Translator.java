@@ -1,3 +1,5 @@
+import javax.swing.*;
+import javax.xml.crypto.dsig.TransformService;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -109,21 +111,22 @@ public class Translator {
         String comp2 = Translator.getSecondComp(sT.getChild(0));
         String comparator = Translator.getComparator(sT.getChild(0));
 
+        String index = String.valueOf(Translator.getInstance().getInstructionIndex());
 
         Translator.getInstance().addInstruction("LOAD", comp1);
         Translator.getInstance().addInstruction("LOAD", comp2);
         //Compare liefert 0 für true
         Translator.getInstance().addInstruction("COMPARE", comparator);
-        Translator.getInstance().addInstruction("GOTRUE", "out");
+        Translator.getInstance().addInstruction("GOTRUE", "out" + index);
         Translator.traverse(sT.getChild(1));
-        Translator.getInstance().addInstruction("OUT");
-        Translator.getInstance().addInstruction("LABEL", "out");
+        //Translator.getInstance().addInstruction("OUT");
+        Translator.getInstance().addInstruction("LABEL", "out" + index);
     }
 
     public static void addWhileToStack(SyntaxTree sT) {
-        String comp1 = Translator.getFirstComp(sT);
-        String comp2 = Translator.getSecondComp(sT);
-        String comparator = Translator.getComparator(sT);
+        String comp1 = Translator.getFirstComp(sT.getChild(0));
+        String comp2 = Translator.getSecondComp(sT.getChild(0));
+        String comparator = Translator.getComparator(sT.getChild(0));
 
         String index = String.valueOf(Translator.getInstance().getInstructionIndex());
         // RENAME test -> while1
@@ -131,23 +134,38 @@ public class Translator {
         Translator.getInstance().addInstruction("LOAD", comp1);
         Translator.getInstance().addInstruction("LOAD", comp2);
         Translator.getInstance().addInstruction("COMPARE", comparator);
-        Translator.getInstance().addInstruction("GOTRUE", "out");
+        Translator.getInstance().addInstruction("GOTRUE", "out" + index);
         Translator.traverse(sT.getChild(1));
-        Translator.getInstance().addInstruction("GOTO while" + index);
-        Translator.getInstance().addInstruction("LABEL", "out");
-        Translator.getInstance().addInstruction("HALT");
-
+        Translator.getInstance().addInstruction("GOTO",  "while" + index);
+        Translator.getInstance().addInstruction("LABEL", "out" + index);
     }
 
     public static void addDefineToStack(SyntaxTree tree) {
         String symbol = tree.getChild(0).getChild(0).getCharacter();
-        Translator.traverseTerm(tree.getChild(1));
+
+        SyntaxTree child = tree.getChild(1);
+
+        if (child.getToken() == TokenList.TERM) {
+            Translator.traverseTerm(tree.getChild(1));
+        } else {
+            Translator.getInstance().addInstruction("LOAD", child.getChild(0).getCharacter());
+        }
 
         Translator.getInstance().addInstruction("ADDSYMBOL", "", "null", symbol);
     }
 
     public static void addAssignToStack(SyntaxTree tree) {
-        Translator.addDefineToStack(tree);
+        String symbol = tree.getChild(0).getChild(0).getCharacter();
+
+        SyntaxTree child = tree.getChild(1);
+
+        if (child.getToken() == TokenList.TERM) {
+            Translator.traverseTerm(tree.getChild(1));
+        } else {
+            Translator.getInstance().addInstruction("LOAD", child.getChild(0).getCharacter());
+        }
+
+        Translator.getInstance().addInstruction("CHANGEVALUE", "", "null", symbol);
     }
 
     public static void addCallToStack(SyntaxTree tree) {
@@ -158,7 +176,10 @@ public class Translator {
         if (functionName.equals("print")) {
             Translator.getInstance().addInstruction("PRINT", parameter);
         } else {
+            Translator.getInstance().addInstruction("LOAD", parameter);
             Translator.getInstance().addInstruction("ADDSYMBOL", parameter, "back" + index, functionName + index);
+            Translator.getInstance().addInstruction("LOAD", parameter);
+            Translator.getInstance().addInstruction("CHANGEVALUE", "", "null", "s");
             Translator.getInstance().addInstruction("LOADSYMBOLLABEL", functionName + index);
             Translator.getInstance().addInstruction("GOTO", functionName);
             Translator.getInstance().addInstruction("LABEL", "back" + index);
@@ -170,9 +191,26 @@ public class Translator {
         Translator.getInstance().addInstruction("ADDPARAM", param);
     }
 
-    public static void startTraverse(SyntaxTree tree) {
-        Translator.addParameterToStack(tree);
+    public static void startTraverse(SyntaxTree tree, String functionName) {
+        //Translator.addParameterToStack(tree);
+        if (functionName.equals("main")) {
+            Translator.getInstance().addInstruction("LOAD", "0");
+            Translator.getInstance().addInstruction("ADDSYMBOL", "", "null", "s");
+        }
+
+        Translator.getInstance().addInstruction("LABEL", functionName);
+
+        if (!functionName.equals("main")) {
+            Translator.getInstance().addInstruction("LOAD", "s");
+        }
+
         Translator.traverse(tree.getChild(1));
+
+        if (!functionName.equals("main")) {
+            Translator.getInstance().addInstruction("POP");
+            Translator.getInstance().addInstruction("GOTOSTACK");
+        }
+        Translator.getInstance().addInstruction("HALT");
     }
 
     //-------------------------------------------------------------------------
@@ -284,11 +322,11 @@ public class Translator {
 
     private static String getFirstComp(SyntaxTree sT) {
         // From comparision node
-        return sT.getChild(0).getChild(0).getChild(0).getCharacter();
+        return sT.getChild(0).getChild(0).getCharacter();
     }
 
     private static String getSecondComp(SyntaxTree sT) {
-        return sT.getChild(0).getChild(2).getChild(0).getCharacter();
+        return sT.getChild(2).getChild(0).getCharacter();
     }
 
     private static String getComparator(SyntaxTree sT) {

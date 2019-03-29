@@ -146,7 +146,10 @@ public class ArithmetikParserClass implements TokenList{
         if (symbol(sT.insertSubtree(SYMBOL))) {
             if (inPlaceCompareToken(TokenList.SYMBOL,sT)) {
                 return symbol(sT.insertSubtree(SYMBOL));
-            } else if (term(sT.insertSubtree(TERM)) /*&& rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))*/) {
+            } else if (inPlaceCompareToken(TokenList.STRING, sT)) {
+                return string(sT.insertSubtree(STRING));
+            }
+            else if (term(sT.insertSubtree(TERM)) /*&& rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))*/) {
                 return true;
             }
         }
@@ -158,7 +161,10 @@ public class ArithmetikParserClass implements TokenList{
         if (symbol(sT.insertSubtree(SYMBOL))) {
             if (inPlaceCompareToken(TokenList.SYMBOL,sT)) {
                 return symbol(sT.insertSubtree(SYMBOL));
-            } else if (term(sT.insertSubtree(TERM)) /*&& rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))*/) {
+            } else if (inPlaceCompareToken(TokenList.STRING, sT)) {
+                return string(sT.insertSubtree(STRING));
+            }
+            else if (term(sT.insertSubtree(TERM)) /*&& rightExpression(sT.insertSubtree(RIGHT_EXPRESSION))*/) {
                 return true;
             }
         }
@@ -307,6 +313,15 @@ public class ArithmetikParserClass implements TokenList{
             return true;
         } else {
             syntaxError("Symbol erwartet");
+            return false;
+        }
+    }
+
+    boolean string(SyntaxTree sT) {
+        if (match(TokenList.STRING, sT)) {
+            return true;
+        } else {
+            syntaxError("String erwartet");
             return false;
         }
     }
