@@ -15,39 +15,71 @@
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 class ArithmetikParserApplication implements TokenList{
     public static void main(String args[]){
         // Anlegen des Wurzelknotens fuer den Syntaxbaum. Dem Konstruktor
         // wid als Token das Startsymbol der Grammatik uebergeben
 
-        convertSourceCode("testdatei_arithmetik.txt", "tmp.txt");
+        convertSourceCode("input.txt", "tmp.txt");
 
         SyntaxTree parseTree = new SyntaxTree(EXPRESSION);
 
-        NumScanner numScanner = new NumScanner();
+        SourceScanner sourceScanner = new SourceScanner();
         //parser.readInput("tmp.txt");
 
-        if (numScanner.readInput("tmp.txt")) {
+        if (sourceScanner.readInput("tmp.txt")) {
             // lexikalische Analyse durchfuehren
-            if (numScanner.lexicalAnalysis()) {
+            if (sourceScanner.lexicalAnalysis()) {
 
                 // Anlegen des Parsers als Instanz der Klasse ArithmetikParserClass
-                ArithmetikParserClass parser = new ArithmetikParserClass(parseTree, numScanner.tokenStream);
+                ArithmetikParserClass parser = new ArithmetikParserClass(sourceScanner.tokenStream);
+
                 //Aufruf des Parsers und Test, ob gesamte Eingabe gelesen
-                if (parser.expression(parseTree) && parser.inputEmpty()) {
-                    parseTree.printSyntaxTree("", true);    //Ausgabe des Syntaxbaumes und des sematischen Wertes
+                if (parser.parse() && parser.inputEmpty()) {
+                    for (String key : parser.treeList.keySet()) {
+                        SyntaxTree tree = parser.treeList.get(key);
+                        //tree.printSyntaxTree("", true);
+                    }
 
-                    Translator translator = Translator.getInstance();
-                    Translator.traverse(parseTree);
+                    // Array List mit den Instructions aller Funktionen
+                    ArrayList<Translator.Instruction> allInstructions = new ArrayList<>();
 
-                    ArithmetikParserApplication.printInstructions(translator.getInstructions());
+                    SyntaxTree mainTree = parser.treeList.get("main");
+                    if (mainTree == null) {
+                        System.out.println("Keine Main 📣 gefunden!");
+                        return;
+                    }
+
+                    Translator.startTraverse(mainTree);
+                    allInstructions.addAll(Translator.getInstance().getInstructions());
+                    Translator.getInstance().instructions.clear();
+
+                    for (String key : parser.treeList.keySet()) {
+                        if (!key.equals("main")) {
+                            SyntaxTree tree = parser.treeList.get(key);
+                            Translator.startTraverse(tree);
+                            allInstructions.addAll(Translator.getInstance().getInstructions());
+                            Translator.getInstance().instructions.clear();
+                        }
+                    }
+
+                    ArithmetikParserApplication.printInstructions(allInstructions);
+                    //PDA pda = new PDA(Translator.getInstance().getInstructions());
+                    //pda.printSymbolTable();
+
+
+                    PDA pda = new PDA(Translator.getInstance().getInstructions());
+                    //pda.outputList(allInstructions);
+                    //pda.outputHashmap();
+                    pda.run();
                 } else {
-                    System.out.println("Fehler im Ausdruck"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
+                    System.out.println("💣 im 💬"); //Fehlermeldung, falls Ausdruck nicht zu parsen war
                 } // expression
 
             } else {
-                System.out.println("Fehler in lexikalischer Analyse"); //Fehlermeldung, falls lexikalische Analyse fehlgeschlagen
+                System.out.println("💣 in 📖🔎"); //Fehlermeldung, falls lexikalische Analyse fehlgeschlagen
             } // lexicalAnalysis
         } // readInput
     }//main
@@ -57,10 +89,24 @@ class ArithmetikParserApplication implements TokenList{
         for (Translator.Instruction i : instructions) {
             builder.setLength(0);
             builder.append(i.getCommand());
+            builder.append("    ");
 
             if (i.getPayload() != null) {
-                builder.append(": ");
+                builder.append("Payload: ");
                 builder.append(i.getPayload());
+                builder.append(" ");
+            }
+
+            if (i.getLabelPayload() != null) {
+                builder.append("Label: ");
+                builder.append(i.getLabelPayload());
+                builder.append(" ");
+            }
+
+            if (i.getNamePayload() != null) {
+                builder.append("Name: ");
+                builder.append(i.getNamePayload());
+                builder.append(" ");
             }
 
             System.out.println(builder.toString());
@@ -78,14 +124,26 @@ class ArithmetikParserApplication implements TokenList{
                 case "🔁":
                     builder.append("while");
                     break;
-                case "🔃":
-                    builder.append("for");
-                    break;
                 case "👉":
                     builder.append("do");
                     break;
                 case "😵":
                     builder.append("end");
+                    break;
+                case "✍️":
+                    builder.append("define");
+                    break;
+                case "📌":
+                    builder.append("assign");
+                    break;
+                case "🧐":
+                    builder.append("function");
+                    break;
+                case "📣":
+                    builder.append("call");
+                    break;
+                case "🖨":
+                    builder.append("print");
                     break;
                 default:
                     builder.append(word);
@@ -107,10 +165,10 @@ class ArithmetikParserApplication implements TokenList{
 
             while (line != null) {
                 String s = new String(line.getBytes("UTF-8"), "UTF-8");
-                System.out.println(replaceEmojis(s));
+                //System.out.println(replaceEmojis(s));
 
                 writer.write(replaceEmojis(s));
-                writer.newLine();
+                writer.write("\n");
 
                 // read next line
                 line = reader.readLine();

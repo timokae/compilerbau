@@ -1,0 +1,31 @@
+expression       -> define right_expression | assign right_expression | call right_expression | if right_expression | while right_expression | ε
+
+define           -> symbol symbol | symbol term
+
+assign           -> symbol symbol | symbol term
+
+function         -> parameter expression
+
+parameter        -> num | Symbol
+
+call             -> symbol num | symbol symbol
+
+comparator       -> comparision expression
+
+comparision      -> num comp num | symbol comp num | num comp symbol |symbol comp symbol
+
+conditionbrunch  -> 'Do' expression right_expression 'end'
+
+comp             -> '<' | '>' | '=='| '>=' | '<='
+
+symbol           -> 'input:sign'
+
+term             -> operator right_term
+
+operator         -> '(' term right_expression ')' | num
+
+right_term       -> '*' operator rightTerm | '/' operator rightTerm | Epsilon
+
+right_expression -> '+' term right_expression | '-' term right_expression | 'comparison' term right_expression  | expression
+
+num              -> 'input:sign'

@@ -38,11 +38,16 @@ public class Translator {
     }
 
     private static Translator instance;
-    private ArrayList<Instruction> instructions;
+    public ArrayList<Instruction> instructions;
+    private int instructionIndex = 0;
 
     private Translator() {
         this.instructions = new ArrayList<>();
     }
+
+    //-------------------------------------------------------------------------
+    //-------------------Add Instruction Functions-----------------------------
+    //-------------------------------------------------------------------------
 
     public void addInstruction(String command, String payload) {
         instructions.add(new Instruction(command, payload));
@@ -65,13 +70,13 @@ public class Translator {
         return Translator.instance;
     }
 
-    public static void addNumberToStack(SyntaxTree sT) {
-        // Read all numbers from children and add into one number
-        //int[] numbers = Translator.traverserNumber(sT, new int[0]);
-        int number = Integer.valueOf(sT.getChildNodes().getFirst().getCharacter());
+    //-------------------------------------------------------------------------
+    //-------------------Add To Stack Functions--------------------------------
+    //-------------------------------------------------------------------------
 
-        // Add number to stack as instruction
-        Translator.getInstance().addInstruction("LOAD", String.valueOf(number));
+    public static void addValueToStack(SyntaxTree sT) {
+        String value = sT.getCharacter();
+        Translator.getInstance().addInstruction("LOAD", value);
     }
 
     public static void addOperatorToStack(SyntaxTree sT) {
@@ -94,62 +99,103 @@ public class Translator {
                 break;
             case ")":
                 break;
-            default: // char := number
+            default:
                 break;
         }
     }
 
-    public static void addConditionToStack(SyntaxTree sT) {
-        String comp1 = Translator.getFirstComp(sT);
-        String comp2 = Translator.getSecondComp(sT);
-        String comparator = Translator.getComparator(sT);
+    public static void addIfToStack(SyntaxTree sT) {
+        String comp1 = Translator.getFirstComp(sT.getChild(0));
+        String comp2 = Translator.getSecondComp(sT.getChild(0));
+        String comparator = Translator.getComparator(sT.getChild(0));
 
 
         Translator.getInstance().addInstruction("LOAD", comp1);
         Translator.getInstance().addInstruction("LOAD", comp2);
         //Compare liefert 0 für true
         Translator.getInstance().addInstruction("COMPARE", comparator);
-        //GOTRUE überspringt die Anweisung innerhalb der IF funktion bei null.
         Translator.getInstance().addInstruction("GOTRUE", "out");
-        Translator.traverse(sT.getChild(2));
-
-        //Test output Funktion
+        Translator.traverse(sT.getChild(1));
         Translator.getInstance().addInstruction("OUT");
+        Translator.getInstance().addInstruction("LABEL", "out");
+    }
 
+    public static void addWhileToStack(SyntaxTree sT) {
+        String comp1 = Translator.getFirstComp(sT);
+        String comp2 = Translator.getSecondComp(sT);
+        String comparator = Translator.getComparator(sT);
+
+        String index = String.valueOf(Translator.getInstance().getInstructionIndex());
+        // RENAME test -> while1
+        Translator.getInstance().addInstruction("LABEL", "while" + index);
+        Translator.getInstance().addInstruction("LOAD", comp1);
+        Translator.getInstance().addInstruction("LOAD", comp2);
+        Translator.getInstance().addInstruction("COMPARE", comparator);
+        Translator.getInstance().addInstruction("GOTRUE", "out");
+        Translator.traverse(sT.getChild(1));
+        Translator.getInstance().addInstruction("GOTO while" + index);
         Translator.getInstance().addInstruction("LABEL", "out");
         Translator.getInstance().addInstruction("HALT");
 
     }
 
-    public static String getFirstComp(SyntaxTree sT) {
-        return sT.getChild(1).getChild(0).getChild(0).getCharacter();
+    public static void addDefineToStack(SyntaxTree tree) {
+        String symbol = tree.getChild(0).getChild(0).getCharacter();
+        Translator.traverseTerm(tree.getChild(1));
+
+        Translator.getInstance().addInstruction("ADDSYMBOL", "", "null", symbol);
     }
 
-    public static String getSecondComp(SyntaxTree sT) {
-        return sT.getChild(1).getChild(1).getChild(1).getChild(0).getChild(0).getChild(0).getCharacter();
+    public static void addAssignToStack(SyntaxTree tree) {
+        Translator.addDefineToStack(tree);
     }
 
-    public static String getComparator(SyntaxTree sT) {
-        return sT.getChild(1).getChild(1).getChild(0).getCharacter();
+    public static void addCallToStack(SyntaxTree tree) {
+        String functionName = tree.getChild(0).getCharacter();
+        String parameter = tree.getChild(1).getCharacter();
+        String index = String.valueOf(Translator.getInstance().getInstructionIndex());
+
+        if (functionName.equals("print")) {
+            Translator.getInstance().addInstruction("PRINT", parameter);
+        } else {
+            Translator.getInstance().addInstruction("ADDSYMBOL", parameter, "back" + index, functionName + index);
+            Translator.getInstance().addInstruction("LOADSYMBOLLABEL", functionName + index);
+            Translator.getInstance().addInstruction("GOTO", functionName);
+            Translator.getInstance().addInstruction("LABEL", "back" + index);
+        }
     }
+
+    public static void addParameterToStack(SyntaxTree tree) {
+        String param = tree.getChild(0).getChild(0).getCharacter();
+        Translator.getInstance().addInstruction("ADDPARAM", param);
+    }
+
+    public static void startTraverse(SyntaxTree tree) {
+        Translator.addParameterToStack(tree);
+        Translator.traverse(tree.getChild(1));
+    }
+
+    //-------------------------------------------------------------------------
+    //-------------------Traverse Functions------------------------------------
+    //-------------------------------------------------------------------------
 
     public static void traverse(SyntaxTree sT) {
-
-        boolean isConditionNode = Translator.isConditionNode(sT);
         boolean isTermNode = Translator.isOperatorNode(sT);
 
-        if (isConditionNode) {
-            Translator.addConditionToStack(sT);
-        } else if (sT.getTokenString().equals("NUMBER")) { // Numbers > 9 consist of several nodes
-            Translator.addNumberToStack(sT);
-        } else if (isTermNode) { // Node has an expression/term and has an operator
-            Translator.traverse(sT.getChildNodes().get(1)); // first traverse left side
-            Translator.traverse(sT.getChildNodes().get(0)); // then push operator onto stack
-
-            // at the end traverse right right
-            for(int i = 2; i < sT.getChildNodes().size(); i++) {
-                Translator.traverse(sT.getChildNodes().get(i));
-            }
+        if (isDefine(sT)) {
+            Translator.addDefineToStack(sT);
+        }
+        else if (isAssign(sT)) {
+            Translator.addAssignToStack(sT);
+        }
+        else if (isCall(sT)) {
+            Translator.addCallToStack(sT);
+        }
+        else if (isIfCondition(sT)) {
+            Translator.addIfToStack(sT);
+        }
+        else if (isWhileLoop(sT)) {
+            Translator.addWhileToStack(sT);
         }
         // No specific case found
         else {
@@ -157,38 +203,106 @@ public class Translator {
                 Translator.traverse(s);
             }
         }
+    }
 
-        // INPUT_SIGN reached that is not a number
-        if (sT.getTokenString().equals("INPUT_SIGN")) {
-            addOperatorToStack(sT);
+    public static void traverseTerm(SyntaxTree tree) {
+        // operator rightTerm
+        traverseOperator(tree.getChild(0));
+        traverseRightTerm(tree.getChild(1));
+    }
+
+    public static void traverseOperator(SyntaxTree tree) {
+        // ( term rightExpression )
+        if (tree.getChildNodes().size() == 4) {
+            traverseTerm(tree.getChild(1));
+            traverseRightTerm(tree.getChild(2));
+        } else if (tree.getChildNodes().size() == 2) {
+            addValueToStack(tree.getChild(0).getChild(0).getChild(0));
+            traverseRightTerm(tree.getChild(1));
         }
+        else {
+            addValueToStack(tree.getChild(0).getChild(0));
+        }
+    }
+
+    public static void traverseRightTerm(SyntaxTree tree) {
+        if (tree.getChild(0).getToken() != TokenList.EPSILON) {
+            traverseOperator(tree.getChild(1));
+            addOperatorToStack(tree.getChild(0));
+            traverseRightTerm(tree.getChild(2));
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    //-------------------Node Matching FUnctions-------------------------------
+    //-------------------------------------------------------------------------
+
+    private static boolean hasOperatorSign(SyntaxTree tree) {
+        return (
+            tree.getToken() == TokenList.PLUS
+            || tree.getToken() == TokenList.MINUS
+            || tree.getToken() == TokenList.MULT
+            || tree.getToken() == TokenList.DIV
+        );
     }
 
     // Returns true if the node has a operator sign and child with an input sign
     private static boolean isOperatorNode(SyntaxTree tree) {
         // node needs to be a term or right_expression
-        boolean isTerm = tree.getTokenString().equals("TERM") || tree.getTokenString().equals("RIGHT_EXPRESSION");
-
-        // node needs a 'input_sign' child
-        boolean childHasInputSign = false;
-        for(SyntaxTree s : tree.getChildNodes()) {
-            if(s.getTokenString().equals("INPUT_SIGN")) {
-                childHasInputSign = true;
-                break;
-            }
-        }
-
-        return isTerm && childHasInputSign;
+        return tree.getToken() == TokenList.TERM;
     }
 
-    private static boolean isConditionNode(SyntaxTree tree) {
-        if (tree.getChildNodes().size() > 0) {
-            boolean isTerm = tree.getTokenString().equals("TERM");
-            boolean isCondition = tree.getChild(0).getCharacter().equals("if");
+    // Node Matcher
 
-            return isTerm && isCondition;
-        }
+    private static boolean isDefine(SyntaxTree tree) {
+        return tree.getToken() == TokenList.DEFINE;
+    }
 
-        return false;
+    private static boolean isAssign(SyntaxTree tree) {
+        return tree.getToken() == TokenList.ASSIGN;
+    }
+
+    private static boolean isCall(SyntaxTree tree) {
+        return tree.getToken() == TokenList.CALL;
+    }
+
+    private static boolean isIfCondition(SyntaxTree tree) {
+        return tree.getToken() == TokenList.IF;
+    }
+
+    private static boolean isWhileLoop(SyntaxTree tree) {
+        return tree.getToken() == TokenList.WHILE;
+    }
+
+    private static boolean isTerm(SyntaxTree tree) {
+        return tree.getToken() == TokenList.TERM;
+    }
+
+    //-------------------------------------------------------------------------
+    //-------------------Helper Functions--------------------------------------
+    //-------------------------------------------------------------------------
+
+    private static String getFirstComp(SyntaxTree sT) {
+        // From comparision node
+        return sT.getChild(0).getChild(0).getChild(0).getCharacter();
+    }
+
+    private static String getSecondComp(SyntaxTree sT) {
+        return sT.getChild(0).getChild(2).getChild(0).getCharacter();
+    }
+
+    private static String getComparator(SyntaxTree sT) {
+        return sT.getChild(1).getCharacter();
+    }
+
+    private void incrementInstructionIndex() {
+        this.instructionIndex++;
+    }
+
+
+    private int getInstructionIndex() {
+        int index = this.instructionIndex;
+        this.incrementInstructionIndex();
+        return index;
     }
 }
