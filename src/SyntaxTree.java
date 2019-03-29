@@ -23,7 +23,7 @@ class SyntaxTree implements TokenList{
 	// Zeichen des Knotens, falls es sich um einen Blaetterknoten, der ein
 	// Eingabezeichen repraesentiert, handelt, d.h. einen Knoten mit dem Token
 	// DIGIT oder MATH_SIGN.
-	private char character;
+	private String character;
 	
 	
 	// value enthaelt die semantsiche Funktion des Teilbaums
@@ -38,10 +38,10 @@ class SyntaxTree implements TokenList{
 	// Der Konstruktor bekommt den TokenTyp t des Knotens uebergeben
 	SyntaxTree(byte t){
 		this.childNodes= new LinkedList<SyntaxTree>();
-		character=0;
+		character="";
 		setToken(t);
 		setSemantikFunction(t);
-		}	
+	}
 	//-------------------------------------------------------------------------
 	// get und set Methoden des Syntaxbaumes
 	//-------------------------------------------------------------------------
@@ -59,12 +59,12 @@ class SyntaxTree implements TokenList{
 	
 	// Bei einem Knoten, der ein Eingabezeichen repraesentiert (INPUT_SIGN)
 	// wird mit dieser Methode das Zeichen im Knoten gespeichert
-	void setCharacter(char character){
+	void setCharacter(String character){
 		this.character=character;
 	}
 	
 	// Gibt das zum Knoten gehoerende Eingabezeichen zurueck
-	char getCharacter(){
+	String getCharacter(){
 		return this.character;
 	}
 	
@@ -82,8 +82,8 @@ class SyntaxTree implements TokenList{
         }
 
         System.out.print(this.getTokenString());
-        if(this.character!=0)
-            System.out.print(":"+this.getCharacter());
+        if(!this.character.equals(""))
+            System.out.print(":" + this.getCharacter());
 	    System.out.println();
 
 
@@ -127,6 +127,7 @@ class SyntaxTree implements TokenList{
 			case 14: return "DIV";
 			case 8: return "IDENT";
 			case 2: return "DIGIT";
+			case 25: return "COMPARATOR";
 			default: return "";
 		}
 	}
