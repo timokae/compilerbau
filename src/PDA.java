@@ -19,13 +19,6 @@ public class PDA {
         public String label;
         }
 
-
-
-
-    /*public PDA() {
-
-        stack = new LinkedList<>();
-    }*/
     public PDA(ArrayList<Translator.Instruction> program) {
 
         stack = new LinkedList<>();
@@ -37,7 +30,9 @@ public class PDA {
     {
         this.labelList.put (labelName, commandLine);
     }
+
     private int goTo (String labelName) {
+        outputHashmap();
         return labelList.get(labelName);
     }
     private int goTrue(String labelName){
@@ -53,7 +48,7 @@ public class PDA {
         else return -1;
     }
 
-    //ggf. private setzten? ggf. nicht benötigt
+
     public String pop() {
         return stack.pop();
     }
@@ -70,14 +65,6 @@ public class PDA {
         return this.stack;
     }
 
-    //momentan nicht verwednet
-    /*public static PDA getInstance() {
-        if (PDA.instance == null) {
-            PDA.instance = new PDA();
-        }
-
-        return PDA.instance;
-    }*/
 
     public void add()    {this.load(Integer.parseInt(this.pop())+Integer.parseInt(this.pop()));}
     public void sub()
@@ -118,8 +105,8 @@ public class PDA {
                 } else this.load(0);
                 break;
         }
-
     }
+
     public void addSymbol(String name,String value){
         symbolElement element = new symbolElement();
         element.name = name;
@@ -141,11 +128,11 @@ public class PDA {
         }
         return -1;
     }
-    public void printSymbolTable(){
-        for (symbolElement elements : symbolTable){
-                System.out.println(elements.name +" " + elements.value + " "+ "elements.lable");
+
+    public void changeValue(Translator.Instruction instruction    ){
+        symbolTable.remove((getSymbolIndex(instruction.getPayload())));
+        this.addSymbol(instruction.getNamePayload(),instruction.getPayload(),instruction.getLabelPayload());
         }
-    }
 
 
     //removes and prints an element from the stack.
@@ -153,18 +140,29 @@ public class PDA {
         System.out.println(this.pop());
     }
 
+    public void print(String payload) {
+        System.out.println(payload);
+        for (symbolElement elements : symbolTable){
+            if (payload.equals(elements.name)){
+                payload = elements.value;
+            }
+        }
+        System.out.println(payload);
+    }
     public void popRegister(String registerAdress){
         register[Integer.parseInt(registerAdress)]= this.pop();
     }
-
 
     public void run(){
         int i = 0;
         //create Labels
         while (i<program.size()){
+            //System.out.println(i);
             if (program.get(i).getCommand().equals("LABEL"))
             {
+                //System.out.println("label created");
                 i = execute(program.get(i),i);
+
             }else i++;
         }
 
@@ -236,6 +234,11 @@ public class PDA {
             case"LOADSYMBOLLABEL":
                 this.load(symbolTable.get(getSymbolIndex(Instruction.getPayload())).label);
                 break;
+            case"CHANGEVALUE":
+                //change existing values from a symboltable
+                this.changeValue(Instruction);
+            case"PRINT":
+                this.print(Instruction.getPayload());
         }
             if (ret == -1){
             return currentPosition+1;
@@ -254,6 +257,11 @@ public class PDA {
             String key =name.toString();
             String value = labelList.get(name).toString();
             System.out.println(key + " " + value);
+        }
+    }
+    public void printSymbolTable(){
+        for (symbolElement elements : symbolTable){
+            System.out.println(elements.name +" " + elements.value + " "+ elements.label);
         }
     }
 }
