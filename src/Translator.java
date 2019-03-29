@@ -185,7 +185,7 @@ public class Translator {
             Translator.getInstance().addInstruction("LOAD", parameter);
             Translator.getInstance().addInstruction("CHANGEVALUE", "", "null", "s");
             Translator.getInstance().addInstruction("LOADSYMBOLLABEL", functionName + index);
-            Translator.getInstance().addInstruction("LOAD_FUNCTION_NAME", functionName + index);
+            Translator.getInstance().addInstruction("LOAD_FUNCTION_NAME", returnVar);
             Translator.getInstance().addInstruction("GOTO", functionName);
             Translator.getInstance().addInstruction("LABEL", "back" + index);
         }

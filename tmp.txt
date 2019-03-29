@@ -1,9 +1,12 @@
 function main 1
-    define x 0
-    call output 3 x
-    call print x x
+    define a 1
+
+    while a < 4 do
+        assign a (a+1)
+        call print a
+    end
 end
 
-function output 2
-    return 1
+function testfunction 2
+    define b 2
 end

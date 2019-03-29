@@ -153,7 +153,7 @@ public class PDA {
         symbolElement  help = symbolTable.get(getSymbolIndex((name)));
         symbolTable.remove((getSymbolIndex(name)));
         help.value = value;
-        this.addSymbol(help.name,help.value,help.label);
+        this.addSymbol(help.name,substitude(help.value),help.label);
     }
 
 

@@ -5,5 +5,6 @@ function main 1
 end
 
 function output 2
-    return 1
+    define k 99
+    return k
 end
