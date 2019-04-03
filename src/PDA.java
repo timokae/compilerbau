@@ -12,18 +12,19 @@ public class PDA {
     private HashMap<String, Integer> labelList = new HashMap<String, Integer>();
     private String register[];
     private LinkedList<symbolElement> symbolTable = new LinkedList<>();
+    private LinkedList<LinkedList<symbolElement>> symbolTableList = new LinkedList<>();
 
     public class symbolElement{
         public String name;
         public String value;
         public String label;
-        }
+    }
 
     public PDA(ArrayList<Translator.Instruction> program) {
-
         stack = new LinkedList<>();
         register = new String[140];
         this.program = program;
+        //symbolTableList.push(symbolTable);
     }
 
     private void label(String labelName, int commandLine)
@@ -32,7 +33,6 @@ public class PDA {
     }
 
     private int goTo (String labelName) {
-        outputHashmap();
         return labelList.get(labelName);
     }
     private int goTrue(String labelName){
@@ -55,52 +55,99 @@ public class PDA {
 
     public void load(String element){
         stack.push(element);
+        //for (String s : this.stack) {
+        //    System.out.println(s);
+        //    System.out.println("---");
+        //}
     }
     //to load integers
     public void load(Integer element) {
         stack.push(element.toString());
     }
+
     // momentan ncht verwendet
     public LinkedList<String> getStack() {
         return this.stack;
     }
 
 
-    public void add()    {this.load(Integer.parseInt(this.pop())+Integer.parseInt(this.pop()));}
+    public void add()
+    {
+        String num1 = substitude(this.pop());
+        String num2 = substitude(this.pop());
+        this.load(Integer.parseInt(num1)+Integer.parseInt(num2));
+    }
     public void sub()
     {
-        this.load(Integer.parseInt(this.pop())-Integer.parseInt(this.pop()));
+        String num1 = substitude(this.pop());
+        String num2 = substitude(this.pop());
+        this.load(Integer.parseInt(num2)-Integer.parseInt(num1));
     }
     public void mul()
     {
-        this.load(Integer.parseInt(this.pop())*Integer.parseInt(this.pop()));
+        String num1 = substitude(this.pop());
+        String num2 = substitude(this.pop());
+        this.load(Integer.parseInt(num1)*Integer.parseInt(num2));
     }
     public void div()
     {
-        this.load(Integer.parseInt(this.pop())/Integer.parseInt(this.pop()));
+        String num1 = substitude(this.pop());
+        String num2 = substitude(this.pop());
+        this.load(Integer.parseInt(num2)/Integer.parseInt(num1));
     }
     public void move(String labelName){
         this.load(labelName);
     }
     public int goToStack(){
-        return goTo(this.pop());
+        String tmp = this.pop();
+        return goTo(tmp);
+    }
+
+    public void newSymbolTable(){
+        //add the current symbolTable to the list
+        LinkedList<symbolElement> symbolTableHelper = new LinkedList<>();
+        //copy current working symbolTable (which is symbolTable)
+
+        for (symbolElement x:symbolTable){
+            symbolTableHelper.add(x);
+        }
+        this.symbolTableList.add(symbolTableHelper);
+    }
+    public void destroySymbolTable(){
+        //remove the most recent symbolTable
+
+        LinkedList<symbolElement> symbolTableHelper = new LinkedList<>();
+        for (symbolElement x:symbolTableList.getLast()){
+            symbolTableHelper.add(x);
+        }
+        symbolTable.clear();
+        //restore previous values to symboltable
+        for (symbolElement x:symbolTableHelper){
+            symbolTable.add(x);
+        }
+
+
+        this.symbolTableList.removeLast();
     }
 
     public void compare(String comperator){
+        String comp1 = substitude(this.pop());
+        String comp2 = substitude(this.pop());
+
         switch(comperator) {
             //comparing element 1 (loaded first) to element 2 (loaded most recent)
             case ">":
-                if (Integer.parseInt(this.pop())< Integer.parseInt(this.pop())) {
+                if (Integer.parseInt(comp1)< Integer.parseInt(comp2)) {
                     this.load(1);
                 } else this.load(0);
                 break;
             case "<":
-                if (Integer.parseInt(this.pop())> Integer.parseInt(this.pop())) {
+                if (Integer.parseInt(comp1)> Integer.parseInt(comp2)) {
                     this.load(1);
                 } else this.load(0);
                 break;
             case "==":
-                if (this.pop().equals(this.pop())) {
+                if (comp1.equals(comp2)) {
                     this.load(1);
                 } else this.load(0);
                 break;
@@ -113,6 +160,7 @@ public class PDA {
         element.value = value;
         symbolTable.add(element);
     }
+
     public void addSymbol(String name,String value, String label){
         symbolElement element = new symbolElement();
         element.name = name;
@@ -130,9 +178,16 @@ public class PDA {
     }
 
     public void changeValue(Translator.Instruction instruction    ){
-        symbolTable.remove((getSymbolIndex(instruction.getPayload())));
-        this.addSymbol(instruction.getNamePayload(),instruction.getPayload(),instruction.getLabelPayload());
-        }
+        symbolTable.remove(getSymbolIndex(instruction.getNamePayload()));
+        this.addSymbol(instruction.getNamePayload(),this.pop(),instruction.getLabelPayload());
+    }
+
+    public void changeValue(String name, String value){
+        symbolElement  help = symbolTable.get(getSymbolIndex((name)));
+        symbolTable.remove((getSymbolIndex(name)));
+        help.value = value;
+        this.addSymbol(help.name,substitude(help.value),help.label);
+    }
 
 
     //removes and prints an element from the stack.
@@ -141,7 +196,6 @@ public class PDA {
     }
 
     public void print(String payload) {
-        System.out.println(payload);
         for (symbolElement elements : symbolTable){
             if (payload.equals(elements.name)){
                 payload = elements.value;
@@ -152,7 +206,12 @@ public class PDA {
     public void popRegister(String registerAdress){
         register[Integer.parseInt(registerAdress)]= this.pop();
     }
-
+    public void showstack(){
+        for (String s : this.stack) {
+            System.out.println(s);
+        }
+        System.out.println("---");
+    }
     public void run(){
         int i = 0;
         //create Labels
@@ -169,7 +228,7 @@ public class PDA {
         //run the actual program
         int j = 0;
         while (j<program.size()){
-        j = execute(program.get(j),j);
+            j = execute(program.get(j),j);
         }
         System.out.println("Programm completed");
     }
@@ -190,7 +249,13 @@ public class PDA {
                 this.div();
                 break;
             case"LOAD":
-                this.load(Integer.parseInt(Instruction.getPayload()));
+                String payload = Instruction.getPayload();
+                this.load(substitude(payload));
+                //this.showstack();
+                break;
+            case "LOAD_FUNCTION_NAME":
+                String functionName = Instruction.getPayload();
+                this.load(functionName);
                 break;
             case "LABEL":
                 this.label(Instruction.getPayload(),currentPosition);
@@ -226,7 +291,7 @@ public class PDA {
                 this.out();
                 break;
             case"ADDSYMBOL":
-                this.addSymbol(Instruction.getNamePayload(),Instruction.getPayload(),Instruction.getLabelPayload());
+                this.addSymbol(Instruction.getNamePayload(),this.pop(),Instruction.getLabelPayload());
                 break;
             case"LOADSYMBOLVALUE":
                 this.load(symbolTable.get(getSymbolIndex(Instruction.getPayload())).value);
@@ -235,12 +300,33 @@ public class PDA {
                 this.load(symbolTable.get(getSymbolIndex(Instruction.getPayload())).label);
                 break;
             case"CHANGEVALUE":
-                //change existing values from a symboltable
                 this.changeValue(Instruction);
+                //this.printSymbolTable();
+                break;
+            case"CHANGESTACK":
+                String value;
+                String target;
+                value = this.pop();
+                target = this.pop();
+                this.changeValue(target,value);
+                break;
             case"PRINT":
                 this.print(Instruction.getPayload());
+                break;
+            case"SHOWSTACK":
+                this.showstack();
+                break;
+            case"NEWSYMBOLTABLE":
+                this.newSymbolTable();
+                break;
+            case"DESTROYSYMBOLTABLE":
+                this.destroySymbolTable();
+                break;
+
+            default:
+                System.out.println(command);
         }
-            if (ret == -1){
+        if (ret == -1){
             return currentPosition+1;
         }else {
             return ret;
@@ -263,5 +349,14 @@ public class PDA {
         for (symbolElement elements : symbolTable){
             System.out.println(elements.name +" " + elements.value + " "+ elements.label);
         }
+    }
+
+    public String substitude(String payload) {
+        for (symbolElement elements : symbolTable){
+            if (payload.equals(elements.name)){
+                return elements.value;
+            }
+        }
+        return payload;
     }
 }
