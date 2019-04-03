@@ -149,7 +149,6 @@ class ArithmetikParserApplication implements TokenList{
                 case "👈":
                     builder.append("return");
                     break;
-
                 default:
                     builder.append(word);
                     break;
