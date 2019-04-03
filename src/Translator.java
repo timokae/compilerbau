@@ -184,10 +184,25 @@ public class Translator {
             Translator.getInstance().addInstruction("ADDSYMBOL", parameter, "back" + index, functionName + index);
             Translator.getInstance().addInstruction("LOAD", parameter);
             Translator.getInstance().addInstruction("CHANGEVALUE", "", "null", "s");
+
+            //put s onto the stack to ensure we can get it back after calling a different funktion
+            //Translator.getInstance().addInstruction("LOAD", parameter);
+
             Translator.getInstance().addInstruction("LOADSYMBOLLABEL", functionName + index);
             Translator.getInstance().addInstruction("LOAD_FUNCTION_NAME", returnVar);
+
+            //BEFORE entering a funktion create a fresh copy of the symboltable and destroy it before sending the return value
+            Translator.getInstance().addInstruction("NEWSYMBOLTABLE");
+
             Translator.getInstance().addInstruction("GOTO", functionName);
             Translator.getInstance().addInstruction("LABEL", "back" + index);
+
+            //new code to restore the value of s which was is stored on the stack
+            Translator.getInstance().addInstruction("POP", "", "null", "s");
+            //not sure if this works but ideally s is placed onto the stack again
+            Translator.getInstance().addInstruction("LOAD", "s");
+            //showstack for debugging purposes
+            //Translator.getInstance().addInstruction("SHOWSTACK","");
         }
     }
 
@@ -206,6 +221,8 @@ public class Translator {
         if (functionName.equals("main")) {
             Translator.getInstance().addInstruction("LOAD", "0");
             Translator.getInstance().addInstruction("ADDSYMBOL", "", "null", "s");
+            //ensure an additional 0 is on the stack to ensure restoration of s is always working
+            Translator.getInstance().addInstruction("LOAD", "0");
         }
 
         Translator.getInstance().addInstruction("LABEL", functionName);
@@ -218,6 +235,13 @@ public class Translator {
 
         if (!functionName.equals("main")) {
             Translator.getInstance().addInstruction("POP");
+
+            //store the return value on the stack so we can backup all other variables
+            Translator.getInstance().addInstruction("LOAD", Translator.getInstance().returnValue);
+
+            //before returning destroy the most recent symboltable our return value should be save on the stack
+            Translator.getInstance().addInstruction("DESTROYSYMBOLTABLE");
+
             Translator.getInstance().addInstruction("CHANGESTACK", Translator.getInstance().returnValue);
             Translator.getInstance().addInstruction("GOTOSTACK");
         }

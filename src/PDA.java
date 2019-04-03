@@ -12,6 +12,7 @@ public class PDA {
     private HashMap<String, Integer> labelList = new HashMap<String, Integer>();
     private String register[];
     private LinkedList<symbolElement> symbolTable = new LinkedList<>();
+    private LinkedList<LinkedList<symbolElement>> symbolTableList = new LinkedList<>();
 
     public class symbolElement{
         public String name;
@@ -20,10 +21,10 @@ public class PDA {
     }
 
     public PDA(ArrayList<Translator.Instruction> program) {
-
         stack = new LinkedList<>();
         register = new String[140];
         this.program = program;
+        //symbolTableList.push(symbolTable);
     }
 
     private void label(String labelName, int commandLine)
@@ -54,11 +55,16 @@ public class PDA {
 
     public void load(String element){
         stack.push(element);
+        //for (String s : this.stack) {
+        //    System.out.println(s);
+        //    System.out.println("---");
+        //}
     }
     //to load integers
     public void load(Integer element) {
         stack.push(element.toString());
     }
+
     // momentan ncht verwendet
     public LinkedList<String> getStack() {
         return this.stack;
@@ -75,7 +81,7 @@ public class PDA {
     {
         String num1 = substitude(this.pop());
         String num2 = substitude(this.pop());
-        this.load(Integer.parseInt(num1)-Integer.parseInt(num2));
+        this.load(Integer.parseInt(num2)-Integer.parseInt(num1));
     }
     public void mul()
     {
@@ -87,7 +93,7 @@ public class PDA {
     {
         String num1 = substitude(this.pop());
         String num2 = substitude(this.pop());
-        this.load(Integer.parseInt(num1)/Integer.parseInt(num2));
+        this.load(Integer.parseInt(num2)/Integer.parseInt(num1));
     }
     public void move(String labelName){
         this.load(labelName);
@@ -95,6 +101,33 @@ public class PDA {
     public int goToStack(){
         String tmp = this.pop();
         return goTo(tmp);
+    }
+
+    public void newSymbolTable(){
+        //add the current symbolTable to the list
+        LinkedList<symbolElement> symbolTableHelper = new LinkedList<>();
+        //copy current working symbolTable (which is symbolTable)
+
+        for (symbolElement x:symbolTable){
+            symbolTableHelper.add(x);
+        }
+        this.symbolTableList.add(symbolTableHelper);
+    }
+    public void destroySymbolTable(){
+        //remove the most recent symbolTable
+
+        LinkedList<symbolElement> symbolTableHelper = new LinkedList<>();
+        for (symbolElement x:symbolTableList.getLast()){
+            symbolTableHelper.add(x);
+        }
+        symbolTable.clear();
+        //restore previous values to symboltable
+        for (symbolElement x:symbolTableHelper){
+            symbolTable.add(x);
+        }
+
+
+        this.symbolTableList.removeLast();
     }
 
     public void compare(String comperator){
@@ -173,7 +206,12 @@ public class PDA {
     public void popRegister(String registerAdress){
         register[Integer.parseInt(registerAdress)]= this.pop();
     }
-
+    public void showstack(){
+        for (String s : this.stack) {
+            System.out.println(s);
+        }
+        System.out.println("---");
+    }
     public void run(){
         int i = 0;
         //create Labels
@@ -213,6 +251,7 @@ public class PDA {
             case"LOAD":
                 String payload = Instruction.getPayload();
                 this.load(substitude(payload));
+                //this.showstack();
                 break;
             case "LOAD_FUNCTION_NAME":
                 String functionName = Instruction.getPayload();
@@ -262,13 +301,28 @@ public class PDA {
                 break;
             case"CHANGEVALUE":
                 this.changeValue(Instruction);
+                //this.printSymbolTable();
                 break;
             case"CHANGESTACK":
-                this.changeValue(this.pop(),Instruction.getPayload());
+                String value;
+                String target;
+                value = this.pop();
+                target = this.pop();
+                this.changeValue(target,value);
                 break;
             case"PRINT":
                 this.print(Instruction.getPayload());
                 break;
+            case"SHOWSTACK":
+                this.showstack();
+                break;
+            case"NEWSYMBOLTABLE":
+                this.newSymbolTable();
+                break;
+            case"DESTROYSYMBOLTABLE":
+                this.destroySymbolTable();
+                break;
+
             default:
                 System.out.println(command);
         }
@@ -303,7 +357,6 @@ public class PDA {
                 return elements.value;
             }
         }
-
         return payload;
     }
 }
