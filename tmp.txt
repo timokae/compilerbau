@@ -1,12 +1,23 @@
 function main 1
-    define a 1
-
-    while a < 4 do
-        assign a (a+1)
-        call print a
-    end
+    define a 0
+    define b 0
+    define c 0
+    define x 0
+    define t 0
+    call fib 25 x
+    call print x x
 end
 
-function testfunction 2
-    define b 2
+function fib 2
+    if s < 3 do
+        assign t 1
+    end
+    if s > 2 do
+        assign b (s-1)
+        assign c (s-2)
+        call fib b b
+        call fib c c
+        assign t (b+c)
+    end
+    return t
 end

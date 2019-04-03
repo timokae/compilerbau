@@ -131,7 +131,7 @@ class ArithmetikParserApplication implements TokenList{
                 case "😵":
                     builder.append("end");
                     break;
-                case "✍️":
+                case "✍":
                     builder.append("define");
                     break;
                 case "📌":
@@ -146,6 +146,10 @@ class ArithmetikParserApplication implements TokenList{
                 case "🖨":
                     builder.append("print");
                     break;
+                case "👈":
+                    builder.append("return");
+                    break;
+
                 default:
                     builder.append(word);
                     break;
