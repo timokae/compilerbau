@@ -1,10 +1,10 @@
 🧐 main 1
-    ✍️ a 0
     ✍️ b 0
     ✍️ c 0
     ✍️ x 0
     ✍️ t 0
     📣 fib 25 x
+    📣 🖨 "fibonacci:" x
     📣 🖨 x x
 😵
 

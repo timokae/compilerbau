@@ -1,5 +1,4 @@
 function main 1
-    define a 0
     define b 0
     define c 0
     define x 0
