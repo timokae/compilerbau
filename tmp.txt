@@ -5,6 +5,7 @@ function main 1
     define x 0
     define t 0
     call fib 25 x
+    call print "fibonacci:" x
     call print x x
 end
 

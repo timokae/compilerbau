@@ -22,7 +22,7 @@ class ArithmetikParserApplication implements TokenList{
         // Anlegen des Wurzelknotens fuer den Syntaxbaum. Dem Konstruktor
         // wid als Token das Startsymbol der Grammatik uebergeben
 
-        convertSourceCode("bspcode/fibo.txt", "tmp.txt");
+        convertSourceCode("input.txt", "tmp.txt");
 
         SyntaxTree parseTree = new SyntaxTree(EXPRESSION);
 

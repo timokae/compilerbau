@@ -1,11 +1,24 @@
 🧐 main 1
-    ✍ x 1
+    ✍️ a 0
+    ✍️ b 0
+    ✍️ c 0
+    ✍️ x 0
+    ✍️ t 0
+    📣 fib 25 x
+    📣 🖨 "fibonacci:" x
+    📣 🖨 x x
+😵
 
-    🔁 x<10 👉
-
-    📣 🖨  zahl  x
-    📣 🖨  x x
-    📌 x (x+1)
-
+🧐 fib 2
+    🔀 s < 3 👉
+        📌 t 1
     😵
+    🔀 s > 2 👉
+        📌 b (s-1)
+        📌 c (s-2)
+        📣 fib b b
+        📣 fib c c
+        📌 t (b+c)
+    😵
+    👈 t
 😵

@@ -22,7 +22,7 @@ class SourceScanner extends Scanner{
 		char[] az = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z'};
 		char[] n09 = {'0','1','2','3','4','5','6','7','8','9'};
 		char[] az09 = {'a','b','c','d','e','f','g','h','i','j','k', 'l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z', '0','1','2','3','4','5','6','7','8','9'};
-		char[] all = {'a','b','c','d','e','f','g','h','i','j','k', 'l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z', '0','1','2','3','4','5','6','7','8','9', ' '};
+		char[] all = {'a','b','c','d','e','f','g','h','i','j','k', 'l','m','n','o','p','q', 'r','s','t','u','v','w','x','y','z', '0','1','2','3','4','5','6','7','8','9', ' ', ':'};
 
 		char transitions[][][]={
 				//              START   KOMMA   SYMBOL  OPEN_PAR    CLOSE_PAR  PLUS     MINUS     MULT     DIV     NUM   Comp0              Comp1   ASSIGN   String  Enstate

@@ -184,6 +184,10 @@ public class ArithmetikParserClass implements TokenList{
                 if (match(TokenList.SYMBOL, sT)) {
                     return true;
                 }
+            } else if (match(TokenList.STRING, sT)) {
+                if (match(TokenList.SYMBOL, sT)) {
+                    return true;
+                }
             }
         }
 
