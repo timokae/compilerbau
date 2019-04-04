@@ -1,11 +1,23 @@
 function main 1
-    define x 1
+    define a 0
+    define b 0
+    define c 0
+    define x 0
+    define t 0
+    call fib 25 x
+    call print x x
+end
 
-    while x<10 do
-
-    call print  zahl  x
-    call print  x y
-    assign x (x+1)
-
+function fib 2
+    if s < 3 do
+        assign t 1
     end
+    if s > 2 do
+        assign b (s-1)
+        assign c (s-2)
+        call fib b b
+        call fib c c
+        assign t (b+c)
+    end
+    return t
 end

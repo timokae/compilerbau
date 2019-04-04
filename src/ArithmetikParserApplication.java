@@ -22,7 +22,7 @@ class ArithmetikParserApplication implements TokenList{
         // Anlegen des Wurzelknotens fuer den Syntaxbaum. Dem Konstruktor
         // wid als Token das Startsymbol der Grammatik uebergeben
 
-        convertSourceCode("input.txt", "tmp.txt");
+        convertSourceCode("bspcode/fibo.txt", "tmp.txt");
 
         SyntaxTree parseTree = new SyntaxTree(EXPRESSION);
 
@@ -40,7 +40,7 @@ class ArithmetikParserApplication implements TokenList{
                 if (parser.parse() && parser.inputEmpty()) {
                     for (String key : parser.treeList.keySet()) {
                         SyntaxTree tree = parser.treeList.get(key);
-                        tree.printSyntaxTree("", true);
+                        // tree.printSyntaxTree("", true);
                     }
 
                     // Array List mit den Instructions aller Funktionen
@@ -65,7 +65,7 @@ class ArithmetikParserApplication implements TokenList{
                         }
                     }
 
-                    ArithmetikParserApplication.printInstructions(allInstructions);
+                    //ArithmetikParserApplication.printInstructions(allInstructions);
                     //PDA pda = new PDA(Translator.getInstance().getInstructions());
                     //pda.printSymbolTable();
 
@@ -131,7 +131,7 @@ class ArithmetikParserApplication implements TokenList{
                 case "😵":
                     builder.append("end");
                     break;
-                case "✍":
+                case "✍️":
                     builder.append("define");
                     break;
                 case "📌":
